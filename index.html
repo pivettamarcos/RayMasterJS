@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+	<head>
+	    <meta charset="utf-8" />
+	    <title>	Test Game </title>
+	    <style>
+	    	* { padding: 0; margin: 0; }
+			#editorCanvas { width: 400px; height: 304px; display: block; float: left; position: relative;}
+	    	#editorGrid { background: #707070; width: 400px; height: 304px; position: absolute; top: 0; left: 0;}
+			#playerCanvas { position: absolute; top: 0; left: 0;}
+	    	#gameScreen { background: #707070; display: block; float: left;}
+	    	#sidebar {background: #bfbfbf; display: block; float: left;}
+	    	#main {height: 600px; width: 600px; border: 1px solid #661111; float: left;}
+	    	span{display: block;float: right;position: relative;z-index:-3;}
+
+	    	#cellInfo {height: 50px; width: 50px; background: #444444; margin: 0 auto; position: relative; margin-top: 10px;}
+	    </style>
+	</head>
+	<body>
+
+	<div id = "main">
+		<div id="editorCanvas">
+			<canvas id="editorGrid" width="400px" height="304px"></canvas>	
+			<canvas id="playerCanvas" width="400px" height="304px"></canvas>	
+		</div>
+		<canvas id="sidebar" width="200px" height="304px"></canvas>
+		
+		<canvas id="gameScreen" width="600px" height="300px"></canvas>
+	</div>
+	
+	<script src="events.js" type="text/javascript"></script>
+	<script src="constants.js" type="text/javascript"></script>	
+	<script src="playerview.js" type="text/javascript"></script>	
+	<script src="main.js" type="text/javascript"></script>
+	<script src="grid.js" type="text/javascript"></script>
+	
+
+	</body>
+</html>

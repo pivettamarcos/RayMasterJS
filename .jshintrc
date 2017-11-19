@@ -1,0 +1,43 @@
+{
+    "esversion": 6,
+    "undef": true,
+    "unused": true,
+    "globals": {
+      //JS GLOBALS
+      "window": true,
+      "document": true,
+      "console": true,
+      "Image": true,
+      "setInterval": true,
+      //CONSTANTS.JS
+      "EDITOR_CANVAS_SIZE": true,
+      "GRID_DIMENSIONS": true,
+      "GAME_CANVAS_SIZE": true,
+      "FOCAL_LENGTH": true,
+      "NUM_RAYS": true,
+      "CELL_SIZE": true,
+      "PLAYER_START_POSITION": true,
+      "PLAYER_SIZE": true,
+      //MAIN.JS
+      "ctxGame": true,
+      "textureMap": true,
+      "gameObjectMap": true,
+      "editorControl": true,
+      "grid": true,
+      "ctxGrid": true,
+      "player": true,
+      "GameObject": true,
+      "selection": true,
+      //GRID.JS
+      "Grid": true,
+      "Cell": true,
+      //PLAYERVIEW.JS
+      "PlayerView": true,
+      //EVENTS.JS
+      "mouse": true,
+      "keyboard": true,
+      "scrollY": true,
+      "changeElementSelected": true,
+      "toggleRays": true
+    }
+}
