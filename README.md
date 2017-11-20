@@ -2,6 +2,10 @@
 
 ## Javascript raycasting game engine
 
+### Link to latest version
+
+https://pivettamarcos.github.io/RayMasterJS/
+
 ### Planning
 
 @ Shading 
@@ -17,6 +21,8 @@
 @ Ability to add collectable to game world, item logic and rendering
 
 @ Floor and ceiling textured casting
+
+@ Mobile responsiveness
 
 ### Versions
 

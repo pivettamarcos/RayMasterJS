@@ -28,6 +28,7 @@
       "player": true,
       "GameObject": true,
       "selection": true,
+      "raysActivated":true,
       //GRID.JS
       "Grid": true,
       "Cell": true,
