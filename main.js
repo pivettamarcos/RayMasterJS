@@ -68,8 +68,8 @@ window.onload = function () {
 
 		this.drawRayLineOnCanvas = function drawRayLineOnCanvas(color, origin, destination){
 			ctxPlayer.beginPath();
-			ctxPlayer.rect(destination.x - 1, destination.y - 1, 4, 4);
-			ctxPlayer.fillStyle = "#ffaa00";
+			ctxPlayer.rect(destination.x - 2, destination.y - 2, 4, 4);
+			ctxPlayer.fillStyle = "#ff0022";
 			ctxPlayer.fill();
 			ctxPlayer.closePath();
 
@@ -146,10 +146,8 @@ window.onload = function () {
 			ctxPlayer.closePath();
 
 			ctxPlayer.beginPath();
-			ctxPlayer.strokeStyle = "#0000ff";
-			ctxPlayer.lineWidth=3;			
 			ctxPlayer.moveTo(this.position.x, this.position.y);
-			ctxPlayer.lineTo(this.position.x + Math.cos(this.playerFacingAngle) * 50, this.position.y + Math.sin(this.playerFacingAngle) * - 50);
+			ctxPlayer.lineTo(this.position.x + Math.cos(this.playerFacingAngle) * 200, this.position.y + Math.sin(this.playerFacingAngle) * - 200);
 			ctxPlayer.stroke();
 		};
 
