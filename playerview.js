@@ -43,7 +43,10 @@ class PlayerView{
         }
 
         ctxGame.beginPath();
+        //ctxGrid.drawImage(textureMap, gameObjectMap[0].textureLocation[0], gameObjectMap[0].textureLocation[1], 0.01, 64, wallX, wallY, wallWidth, wallHeight);
         ctxGame.drawImage(textureMap, rayReturnObject.hitCell.gameObjectOnCell.textureLocation[0] + textureColumnOffset, rayReturnObject.hitCell.gameObjectOnCell.textureLocation[1], 0.01, 64, wallX, wallY,wallWidth, wallHeight);
+        //console.log(rayReturnObject.hitCell);
+        //ctxGame.drawImage(textureMap, 0, 0, 0.01, 64, 0, 0, 1, 64);
         ctxGame.closePath();
     }
 }
@@ -62,8 +65,7 @@ class Ray{
         let nearestHit = this.returnNearestHit(horizontalHit,verticalHit);
 
         if(nearestHit !== undefined)
-            if(raysActivated)
-                this.drawRayOnEditor(nearestHit);
+            this.drawRayOnEditor(nearestHit);
         
         return nearestHit;
     }
@@ -85,8 +87,8 @@ class Ray{
         }else if(hitB !== undefined){
             return hitB;
         }else{
-            if(raysActivated)
-                editorControl.drawRayLineOnCanvas("#afafaf", this.rayOrigin, {x: this.rayOrigin.x + Math.cos(this.rayAngle) * 1000, y: this.rayOrigin.y + Math.sin(this.rayAngle) * -1000});
+            editorControl.drawRayLineOnCanvas("#000000", this.rayOrigin, {x: this.rayOrigin.x + Math.cos(this.rayAngle) * 100, y: this.rayOrigin.y + Math.sin(this.rayAngle) * -100});
+            
             return undefined;
         }
     }
@@ -120,19 +122,10 @@ class Ray{
                 }
         }
 
-        let limit = 0;
+        let cont = 0, limit = 10;
         
         //IF NOT HIT IN FIRST, SEARCH OTHER INTERSECTIONS
-        while(horizontalHitReturnObject === undefined){
-            if(Math.sin(this.rayAngle) > 0){
-                if (limit > Math.floor(player.position.y / CELL_SIZE.x))
-                    break;
-            }else{
-                if (limit > Math.floor((EDITOR_CANVAS_SIZE.y - player.position.y) / CELL_SIZE.y))
-                    break;
-            }
-            limit++;
-
+        while(horizontalHitReturnObject === undefined && cont < limit){
             workingHorizontalHitPoint.y += ((Math.sin(this.rayAngle) > 0) ? -CELL_SIZE.y:  CELL_SIZE.y);
             workingHorizontalHitPoint.x += ((Math.sin(this.rayAngle) > 0) ? (CELL_SIZE.x / Math.tan(this.rayAngle)): -(CELL_SIZE.x / Math.tan(this.rayAngle)));
 
@@ -153,6 +146,8 @@ class Ray{
                     };
                 }
             }
+
+            cont++;
         }
 
         return horizontalHitReturnObject;
@@ -185,19 +180,10 @@ class Ray{
                 }
         }
 
-        let limit = 0;
+        let cont = 0, limit =10;
         
         //IF NOT HIT IN FIRST, SEARCH OTHER INTERSECTIONS
-        while(verticalHitReturnObject === undefined){
-            if (Math.cos(this.rayAngle) > 0){
-                if (limit > Math.floor((EDITOR_CANVAS_SIZE.x - player.position.x) / CELL_SIZE.x))
-                    break;
-            }else{
-                if (limit > Math.floor(player.position.x / CELL_SIZE.x))
-                    break;
-            }
-            limit++;
-
+        while(verticalHitReturnObject === undefined && cont < limit){
             workingVerticalHitPoint.x += ((Math.cos(this.rayAngle) > 0) ? CELL_SIZE.x:  -CELL_SIZE.x);            
             workingVerticalHitPoint.y += ((Math.cos(this.rayAngle) > 0) ? -(CELL_SIZE.x * Math.tan(this.rayAngle)): (CELL_SIZE.x * Math.tan(this.rayAngle)));
 
@@ -215,6 +201,8 @@ class Ray{
                     };
                 }
             }
+
+            cont++;
         }
         return verticalHitReturnObject;
     }
