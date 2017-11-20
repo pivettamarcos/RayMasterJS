@@ -27,11 +27,6 @@ function Mouse(){
 
 
 	this.update = function update(){
-		/*if(this.lastFrame)
-			console.log("This frame: "+ this.position["x"]+ this.clicked + "\n" + "Last frame: "+this.lastFrame.position["x"])
-		else
-			console.log("undef");*/
-
         if(this.lastFrame){
             for(let i = 0; i < this.lastFrame.clicked.length; i++){
                 if(this.lastFrame.clicked[i]){

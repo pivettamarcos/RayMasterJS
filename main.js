@@ -235,21 +235,6 @@ window.onload = function () {
 		};
 	}
 
-	/*function defineVector(originPos, targetPos) {
-		vector = [];
-		randomNum = Math.floor((Math.random() * 10) - 10); // 1 - 10
-		vector.x = targetPos.x - originPos.x + randomNum;
-		vector.y = targetPos.y - originPos.y + randomNum;
-
-		temp = Math.sqrt(vector.x * vector.x + vector.y * vector.y);
-		if (temp != 0) {
-			vector.x = vector.x / temp;
-			vector.y = vector.y / temp;
-		}
-		return vector;
-	}*/
-
-
 	editorControl.update();
 };
 

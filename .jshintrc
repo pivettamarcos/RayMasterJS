@@ -18,6 +18,7 @@
       "CELL_SIZE": true,
       "PLAYER_START_POSITION": true,
       "PLAYER_SIZE": true,
+      "SHADING_TRANSPARENCY": true,
       //MAIN.JS
       "ctxGame": true,
       "textureMap": true,

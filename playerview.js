@@ -35,16 +35,26 @@ class PlayerView{
         let wallWidth = (GAME_CANVAS_SIZE.x / NUM_RAYS);
         let wallHeight = wallSize;
         let textureColumnOffset;
+        let isHorizontal = false;
 
         if (rayReturnObject.intersectionType == "horizontal") {
+            isHorizontal = true;
             textureColumnOffset = Math.floor((rayReturnObject.hitPoint.x % CELL_SIZE.x) * 4);
         }else{
             textureColumnOffset = Math.floor((rayReturnObject.hitPoint.y % CELL_SIZE.x) * 4);
         }
 
         ctxGame.beginPath();
-        ctxGame.drawImage(textureMap, rayReturnObject.hitCell.gameObjectOnCell.textureLocation[0] + textureColumnOffset, rayReturnObject.hitCell.gameObjectOnCell.textureLocation[1], 0.01, 64, wallX, wallY,wallWidth, wallHeight);
+        ctxGame.drawImage(textureMap, rayReturnObject.hitCell.gameObjectOnCell.textureLocation[0] + textureColumnOffset, rayReturnObject.hitCell.gameObjectOnCell.textureLocation[1], 1, 64, wallX, wallY,wallWidth, wallHeight);
         ctxGame.closePath();
+
+        if(isHorizontal){
+            ctxGame.beginPath();
+            ctxGame.rect(wallX, wallY,wallWidth, wallHeight);
+            ctxGame.fillStyle = 'rgba(0, 0, 0, '+SHADING_TRANSPARENCY+')';
+            ctxGame.fill();
+            ctxGame.closePath();
+        }
     }
 }
 
@@ -73,7 +83,6 @@ class Ray{
     }
 
     returnNearestHit(hitA,hitB){
-
         if(hitA !== undefined && hitB !== undefined){
             if(hitA.hitDistance < hitB.hitDistance){
                 return hitA;
