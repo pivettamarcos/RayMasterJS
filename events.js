@@ -1,16 +1,65 @@
 //EVENT HANDLERS
 var scrollY = 0;
-var mouse = new Mouse();
-var keyboard = new Keyboard();
+//var mouse = new Mouse();
+//var keyboard = new Keyboard();
 
-function Keyboard(){
-	this.keys = {
-        up: false,
-        down: false,
-        left: false,
-        right: false
-    };
+class KeyboardManager{
+    constructor(updateMiliseconds){
+        this.updateMiliseconds = updateMiliseconds;
+        this.events = {};
+
+        this.includedKeys = [38,39,40,37];
+        this.map = {
+            38: { key: 0, type: 'arrow', pressed: false, action: "move" }, // Up
+            39: { key: 1, type: 'arrow', pressed: false, action: "rotate" }, // Right
+            40: { key: 2, type: 'arrow', pressed: false, action: "move" }, // Down
+            37: { key: 3, type: 'arrow', pressed: false, action: "rotate" } // Left        
+        };
+  
+          
+        this.listen();
+
+        this.updateClass = setInterval(this.update.bind(this), updateMiliseconds);
+    }
 }
+
+KeyboardManager.prototype.update = function () {
+    for(let key of this.includedKeys){
+        if(this.map[key].pressed)
+            this.emit(this.map[key].action, this.map[key]);
+    }
+};
+
+KeyboardManager.prototype.listen = function () {
+    var self = this;
+  
+    document.addEventListener('keydown', function (event) {
+        if(self.map[event.which])
+            self.map[event.which].pressed = true;
+    });
+
+    document.addEventListener('keyup', function (event) {
+        if(self.map[event.which])
+            self.map[event.which].pressed = false;
+    });
+};
+
+KeyboardManager.prototype.emit = function (event, data) {
+    var callbacks = this.events[event];
+    if (callbacks) {
+        callbacks.forEach(function (callback) {
+            callback(data);
+        });
+    }
+};
+
+KeyboardManager.prototype.on = function (event, callback) {
+    console.log(this);
+    if (!this.events[event]) {
+        this.events[event] = [];
+    }
+    this.events[event].push(callback);
+};
 
 function Mouse(){
     this.CLICKED = 0; this.RELEASED = 1; this.MOVED = 2;
@@ -45,6 +94,7 @@ function updateMousePos(event) {
 }
 
 function mouseClicked(event){
+    console.log(editorControl);
     mouse.clicked[event.button] = true;
     console.log("|| ((▼)) Mouse button clicked at: x="+event.clientX +" y="+ event.clientY+" type="+ event.button +" ||");
     editorControl.mouseEvent(mouse.MOUSE1, mouse.CLICKED);
@@ -58,41 +108,7 @@ function mouseClickReleased(event){
 }
 
 (function addEventListenersEditorGrid(){
-    document.getElementById("editorCanvas").addEventListener("mousemove", updateMousePos);
-    document.getElementById("editorCanvas").addEventListener("mousedown", mouseClicked);
-    document.getElementById("editorCanvas").addEventListener("mouseup", mouseClickReleased);
+    document.getElementById("editorDiv").addEventListener("mousemove", updateMousePos);
+    document.getElementById("editorDiv").addEventListener("mousedown", mouseClicked);
+    document.getElementById("editorDiv").addEventListener("mouseup", mouseClickReleased);
 })();
-
-window.onkeydown = function(e) {
-    var kc = e.keyCode;
-    e.preventDefault();
-
-    if      (kc === 37) keyboard.keys.left = true;  // only one key per event
-    else if (kc === 38) keyboard.keys.up = true;    // so check exclusively
-    else if (kc === 39) keyboard.keys.right = true;
-    else if (kc === 40) keyboard.keys.down = true;
-    else if (kc === 49) changeElementSelected(0); // WALL TYPE 1
-    else if (kc === 50) changeElementSelected(1); // WALL TYPE 2
-    else if (kc === 51) changeElementSelected(2); // WALL TYPE 3
-    else if (kc === 52) changeElementSelected(3); // WALL TYPE 4
-    else if (kc === 53) changeElementSelected(4); // WALL TYPE 5
-    else if (kc === 54) changeElementSelected(5); // WALL TYPE 6
-    else if (kc === 55) changeElementSelected(6); // WALL TYPE 7
-    else if (kc === 56) changeElementSelected(7); // WALL TYPE 8
-    else if (kc === 18) toggleRays(); // TOGGLE RAYS
-};
-
-window.onkeyup = function(e) {
-    var kc = e.keyCode;
-    e.preventDefault();
-
-    if      (kc === 37) keyboard.keys.left = false;
-    else if (kc === 38) keyboard.keys.up = false;
-    else if (kc === 39) keyboard.keys.right = false;
-    else if (kc === 40) keyboard.keys.down = false;
-
-};
-
-window.onscroll = function () {
-    scrollY =  window.pageYOffset; // Value of scroll Y in px
-};

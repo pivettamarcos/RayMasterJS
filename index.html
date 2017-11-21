@@ -5,8 +5,8 @@
 	    <title>	Test Game </title>
 	    <style>
 	    	* { padding: 0; margin: 0; }
-			#editorCanvas { width: 400px; height: 304px; display: block; float: left; position: relative;}
-	    	#editorGrid { background: #707070; width: 400px; height: 304px; position: absolute; top: 0; left: 0;}
+			#editorDiv { width: 400px; height: 304px; display: block; float: left; position: relative;}
+	    	#editorCanvas { background: #707070; width: 400px; height: 304px; position: absolute; top: 0; left: 0;}
 			#playerCanvas { position: absolute; top: 0; left: 0;}
 	    	#gameScreen { background: #707070; display: block; float: left;}
 	    	#sidebar {background: #bfbfbf; display: block; float: left;}
@@ -19,8 +19,8 @@
 	<body>
 
 	<div id = "main">
-		<div id="editorCanvas">
-			<canvas id="editorGrid" width="400px" height="304px"></canvas>	
+		<div id="editorDiv">
+			<canvas id="editorCanvas" width="400px" height="304px"></canvas>	
 			<canvas id="playerCanvas" width="400px" height="304px"></canvas>	
 		</div>
 		<canvas id="sidebar" width="200px" height="304px"></canvas>
@@ -33,6 +33,9 @@
 	<script src="playerview.js" type="text/javascript"></script>	
 	<script src="main.js" type="text/javascript"></script>
 	<script src="grid.js" type="text/javascript"></script>
+	<script src="player.js" type="text/javascript"></script>
+	<script src="editorcontrol.js" type="text/javascript"></script>
+	<script src="app.js" type="text/javascript"></script>
 	
 
 	</body>

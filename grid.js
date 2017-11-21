@@ -1,6 +1,6 @@
 /*exported Grid*/
 
-function Grid(size){
+function Grid(editorControl, size){
 	this.cells = [];
 
 	this.gridCenter = {
@@ -9,6 +9,8 @@ function Grid(size){
 	};
 
 	this.wallCollisionDistance = 0;
+
+	this.editorControl = editorControl;
 
 	this.buildGrid = function buildGrid(){
 		var currentCellPos = {
@@ -30,7 +32,7 @@ function Grid(size){
 
 	this.firstDraw = function firstDraw(){
 		for(var i = 0; i < this.cells.length; i++){
-			this.cells[i].fillCellWith(undefined);
+			this.fillGridCellWith(this.cells[i], undefined);
 		}
 	};
 
@@ -42,11 +44,20 @@ function Grid(size){
 		return {x: Math.floor(worldCoord.x/CELL_SIZE.x), y: Math.floor(worldCoord.y/CELL_SIZE.y)};
 	};
 
+	this.returnCoordAtPos = function returnCoordAtPos(posX, posY) {
+        let coord = {
+            x: Math.floor(posX / CELL_SIZE.x),
+            y: Math.floor(posY / CELL_SIZE.y)
+        };
+
+        return coord;
+    };
+
 	this.returnGameObjectsWithinPoints= function returnGameObjectsWithinPoints(points){
 		let collisionObjects = [];
 
 		for(let i = 0; i < points.length; i++){
-			let cellCollided = this.returnCellAtCoord(player.returnCoordAtPos(points[i].x, points[i].y));
+			let cellCollided = this.returnCellAtCoord(this.returnCoordAtPos(points[i].x, points[i].y));
 			if(cellCollided){
 				if(cellCollided.gameObjectOnCell){
 					collisionObjects.push({object: cellCollided.gameObjectOnCell, point: i});
@@ -64,9 +75,9 @@ function Grid(size){
 					if(mouse.position.x > cell.position.x - cell.size.x/2 && mouse.position.x < cell.position.x + cell.size.x/2 && 
 						mouse.position.y + scrollY > cell.position.y - cell.size.y/2 && mouse.position.y + scrollY < cell.position.y + cell.size.y/2){
 							if(cell.gameObjectOnCell !== undefined)
-								cell.removeGameObject();
+								this.removeGameObjectFromCell(cell);
 							else
-								cell.addGameObject(new GameObject(gameObjectMap[selection]));
+								this.addGameObjectToCell(cell, new GameObject(gameObjectMap[selection]));
 					}
 				}
 		}
@@ -74,6 +85,23 @@ function Grid(size){
 
 	this.buildGrid();
 }
+
+Grid.prototype.removeGameObjectFromCell = function(cell){
+	cell.gameObjectOnCell = undefined;
+	this.fillCellWith(undefined);
+};
+
+Grid.prototype.addGameObjectToCell = function(cell, object){
+	console.log("** ((ADDED)) game object =="+ object.name +"== to cell " + grid.convertToGridCoords(this.position).x + " " + grid.convertToGridCoords(this.position).y  +" **");
+	this.gameObjectOnCell = object;
+	this.fillGridCellWith(cell, cell.gameObjectOnCell.textureLocation);
+};
+
+Grid.prototype.fillGridCellWith = function(cell, texture){
+	let fillAttributes = {texture: texture, posX: cell.returnDrawCenter().x, posY: cell.returnDrawCenter().y, sizeX: cell.size.x ,sizeY: cell.size.y};
+	this.editorControl.fillCellGrid(fillAttributes);
+};
+
 
 class Cell{
 	constructor(position){
@@ -91,40 +119,12 @@ class Cell{
 
 		this.unfilledCellColor = "#FFFFFF";
 	}
-
-	fillCellWith(texture){
-		ctxGrid.beginPath();
-		ctxGrid.strokeStyle = "#000000";
-
-		if(texture === undefined){
-			ctxGrid.fillStyle = this.unfilledCellColor;
-			ctxGrid.rect(this.returnDrawCenter().x, this.returnDrawCenter().y, this.size.x, this.size.y);
-			ctxGrid.fill();
-		}else{
-			ctxGrid.rect(this.returnDrawCenter().x, this.returnDrawCenter().y, this.size.x, this.size.y);
-			ctxGrid.fill();
-			ctxGrid.drawImage(textureMap, texture[0], texture[1], 64, 64, this.returnDrawCenter().x,this.returnDrawCenter().y, this.size.x,this.size.y); 
-		}
-
-		ctxGrid.stroke();
-		ctxGrid.closePath();
-	}
-
-	returnDrawCenter(){
-		let drawCenter = {};
-		drawCenter.x = this.position.x - this.size.x/2;
-		drawCenter.y = this.position.y - this.size.y/2;
-		return drawCenter;
-	}
-
-	removeGameObject(){
-		this.gameObjectOnCell = undefined;
-		this.fillCellWith(undefined);
-	}
-
-	addGameObject(object){
-		console.log("** ((ADDED)) game object =="+ object.name +"== to cell " + grid.convertToGridCoords(this.position).x + " " + grid.convertToGridCoords(this.position).y  +" **");
-		this.gameObjectOnCell = object;
-		this.fillCellWith(this.gameObjectOnCell.textureLocation);
-	}
 }
+
+Cell.prototype.returnDrawCenter = function(){
+	let drawCenter = {};
+	drawCenter.x = this.position.x - this.size.x/2;
+	drawCenter.y = this.position.y - this.size.y/2;
+	return drawCenter;
+};
+

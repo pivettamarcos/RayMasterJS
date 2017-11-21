@@ -37,9 +37,12 @@
       "PlayerView": true,
       //EVENTS.JS
       "mouse": true,
-      "keyboard": true,
+      "KeyboardManager": true,
       "scrollY": true,
       "changeElementSelected": true,
-      "toggleRays": true
+      "toggleRays": true,
+      //EDITORS.JS
+      "EditorControl":true,
+      "GameScreenControl": true
     }
 }
