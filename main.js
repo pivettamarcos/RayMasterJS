@@ -15,6 +15,7 @@ class GameManager{
 		this.selection = 0;
 
 		this.keyboardManager = new KeyboardManager(this.updateMiliseconds);
+		this.clickManager = new ClickManagement(this.updateMiliseconds);		
 
 		this.setup();
 	}

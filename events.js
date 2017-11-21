@@ -61,32 +61,52 @@ KeyboardManager.prototype.on = function (event, callback) {
     this.events[event].push(callback);
 };
 
-function Mouse(){
+function ClickManagement(){
     this.CLICKED = 0; this.RELEASED = 1; this.MOVED = 2;
     this.MOUSE1 = 0; this.MOUSE2 = 1; this.MOUSE3 = 2;
 	this.clicked = [false,false,false];
 	this.pressed = [false,false,false];
 	this.released = [false,false,false];
-	this.lastFrame = undefined;
+    this.lastFrame = undefined;
+    
+    this.map = {
+        0: { key: 0, type: 'mouseClick', clicked: false, pressed: false, action: "interactGrid" }, // Up
+        1: { key: 1, type: 'mouseClick', clicked: false, pressed: false, action: "rotate" }, // Right
+        2: { key: 2, type: 'mouseClick', clicked: false, pressed: false, action: "move" }, // Down
+    };
 
 	this.position = {
         x: undefined,
         y: undefined
     };
 
+    this.listen();
+}
+ClickManagement.prototype.listen = function(){
 
-	this.update = function update(){
-        if(this.lastFrame){
-            for(let i = 0; i < this.lastFrame.clicked.length; i++){
-                if(this.lastFrame.clicked[i]){
-                    this.lastFrame.clicked[i] = false;
-                }
+    document.getElementById("editorDiv").addEventListener("mousemove", function(event){
+        this.map[event.button].pressed = true;
+    });
+    document.getElementById("editorDiv").addEventListener("mousedown", function(event){
+        console.log(event);
+    });
+    document.getElementById("editorDiv").addEventListener("mouseup", function(event){
+
+    });
+
+}
+
+ClickManagement.prototype.update = function (){
+    if(this.lastFrame){
+        for(let i = 0; i < this.lastFrame.clicked.length; i++){
+            if(this.lastFrame.clicked[i]){
+                this.lastFrame.clicked[i] = false;
             }
         }
-        
-        this.lastFrame = Object.assign({},this);
-	};
-}
+    }
+    
+    this.lastFrame = Object.assign({},this);
+};
 
 function updateMousePos(event) {
 	mouse.position.x = event.clientX;  
@@ -94,10 +114,11 @@ function updateMousePos(event) {
 }
 
 function mouseClicked(event){
-    console.log(editorControl);
+    console.log(event);
+   /* console.log(editorControl);
     mouse.clicked[event.button] = true;
     console.log("|| ((▼)) Mouse button clicked at: x="+event.clientX +" y="+ event.clientY+" type="+ event.button +" ||");
-    editorControl.mouseEvent(mouse.MOUSE1, mouse.CLICKED);
+    editorControl.mouseEvent(mouse.MOUSE1, mouse.CLICKED);*/
 }
 
 function mouseClickReleased(event){
@@ -107,8 +128,4 @@ function mouseClickReleased(event){
     //gridInteraction();
 }
 
-(function addEventListenersEditorGrid(){
-    document.getElementById("editorDiv").addEventListener("mousemove", updateMousePos);
-    document.getElementById("editorDiv").addEventListener("mousedown", mouseClicked);
-    document.getElementById("editorDiv").addEventListener("mouseup", mouseClickReleased);
-})();
+
