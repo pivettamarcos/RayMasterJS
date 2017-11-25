@@ -1,7 +1,7 @@
 /*exported Player */
 
-function Player(editorControl) {
-
+function Player(editorControl, gameScreenControl) {
+    this.gameScreenControl = gameScreenControl;
     this.editorControl = editorControl;
 
     this.position = {
@@ -15,7 +15,7 @@ function Player(editorControl) {
     };
 
     this.playerFacingAngle = Math.PI / 2; //90 degrees
-    this.playerView = new PlayerView(this.position);
+    //this.playerView = new PlayerView(this.position, this.editorControl, this.gameScreenControl);
 
     this.turningAngle = Math.PI / 100;
 
@@ -23,15 +23,6 @@ function Player(editorControl) {
     this.movingSpeed = 2;
 
     this.once = true;
-
-    this.update = function update() {
-        this.draw();
-        //if(this.once){
-            this.playerView.castRays(this.playerFacingAngle);
-            //this.once = false;
-        //}
-        this.interact();
-    };
 
     this.move = function move(data) {
         let nextPos;

@@ -68,16 +68,16 @@ function Grid(editorControl, size){
 		return collisionObjects;
 	};
 
-	this.mouseInteraction = function mouseInteraction(button){
+	this.mouseInteraction = function mouseInteraction(button, position){
 		switch(button){ // LEFT CLICK
-			case mouse.MOUSE1:
+			case 0:
 				for(let cell of this.cells){
-					if(mouse.position.x > cell.position.x - cell.size.x/2 && mouse.position.x < cell.position.x + cell.size.x/2 && 
-						mouse.position.y + scrollY > cell.position.y - cell.size.y/2 && mouse.position.y + scrollY < cell.position.y + cell.size.y/2){
+					if(position.x > cell.position.x - cell.size.x/2 && position.x < cell.position.x + cell.size.x/2 && 
+						position.y + scrollY > cell.position.y - cell.size.y/2 && position.y + scrollY < cell.position.y + cell.size.y/2){
 							if(cell.gameObjectOnCell !== undefined)
 								this.removeGameObjectFromCell(cell);
 							else
-								this.addGameObjectToCell(cell, new GameObject(gameObjectMap[selection]));
+								this.addGameObjectToCell(cell, new GameObject(editorControl.gameManager.gameObjectMap[editorControl.gameManager.selection]));
 					}
 				}
 		}
@@ -87,21 +87,27 @@ function Grid(editorControl, size){
 }
 
 Grid.prototype.removeGameObjectFromCell = function(cell){
+	console.log(cell);
 	cell.gameObjectOnCell = undefined;
-	this.fillCellWith(undefined);
+	this.fillGridCellWith(cell, undefined);
 };
 
 Grid.prototype.addGameObjectToCell = function(cell, object){
-	console.log("** ((ADDED)) game object =="+ object.name +"== to cell " + grid.convertToGridCoords(this.position).x + " " + grid.convertToGridCoords(this.position).y  +" **");
-	this.gameObjectOnCell = object;
-	this.fillGridCellWith(cell, cell.gameObjectOnCell.textureLocation);
+	//console.log("** ((ADDED)) game object =="+ object.name +"== to cell " + this.convertToGridCoords(this.position.x) + " " + this.convertToGridCoords(this.position.y)  +" **");
+	console.log(object);
+	cell.gameObjectOnCell = object;
+	this.fillGridCellWith(cell, object.textureLocation);
 };
 
 Grid.prototype.fillGridCellWith = function(cell, texture){
-	let fillAttributes = {texture: texture, posX: cell.returnDrawCenter().x, posY: cell.returnDrawCenter().y, sizeX: cell.size.x ,sizeY: cell.size.y};
-	this.editorControl.fillCellGrid(fillAttributes);
+	if(texture !== undefined){
+		let fillAttributes = {texture: texture, posX: cell.returnDrawCenter().x, posY: cell.returnDrawCenter().y, sizeX: cell.size.x ,sizeY: cell.size.y};
+		this.editorControl.fillCellGrid(fillAttributes);
+	}else{
+		let fillAttributes = {posX: cell.returnDrawCenter().x, posY: cell.returnDrawCenter().y, sizeX: cell.size.x ,sizeY: cell.size.y};
+		this.editorControl.fillCellGrid(fillAttributes);
+	}
 };
-
 
 class Cell{
 	constructor(position){

@@ -1,17 +1,19 @@
 /*exported PlayerView*/
 
 class PlayerView{
-    constructor(raysOrigin){
+    constructor(raysOrigin, editorControl, gameScreenControl){
+        this.gameScreenControl = gameScreenControl;
         this.raysOrigin = raysOrigin;
         this.distanceToProjectionPlane = (GAME_CANVAS_SIZE.x / 2) / (Math.tan(FOCAL_LENGTH / 2));
 		this.angleBetweenRays = (FOCAL_LENGTH / (NUM_RAYS));
+	    this.editorControl = editorControl;
     }
 
     castRays(playerFacingAngle){
         let rayReturnObjects = [];
         for(let i = 0; i < NUM_RAYS; i++){
             let rayAngle = (playerFacingAngle + FOCAL_LENGTH/2) - i * this.angleBetweenRays;
-            let currentRay = new Ray(rayAngle, this.raysOrigin, i);
+            let currentRay = new Ray(rayAngle, this.raysOrigin, i, this.editorControl);
                         
             rayReturnObjects.push(currentRay.cast());
         }
@@ -44,25 +46,21 @@ class PlayerView{
             textureColumnOffset = Math.floor((rayReturnObject.hitPoint.y % CELL_SIZE.x) * 4);
         }
 
-        ctxGame.beginPath();
-        ctxGame.drawImage(textureMap, rayReturnObject.hitCell.gameObjectOnCell.textureLocation[0] + textureColumnOffset, rayReturnObject.hitCell.gameObjectOnCell.textureLocation[1], 1, 64, wallX, wallY,wallWidth, wallHeight);
-        ctxGame.closePath();
+        this.gameScreenControl.drawRectangle(true, {img: this.editorControl.gameManager.textureMap, sX: rayReturnObject.hitCell.gameObjectOnCell.textureLocation[0] + textureColumnOffset, sY: rayReturnObject.hitCell.gameObjectOnCell.textureLocation[1], 
+            sWidth: 1, sHeight: 64, x: wallX, y: wallY, width: wallWidth, height: wallHeight});
 
         if(isHorizontal){
-            ctxGame.beginPath();
-            ctxGame.rect(wallX, wallY,wallWidth, wallHeight);
-            ctxGame.fillStyle = 'rgba(0, 0, 0, '+SHADING_TRANSPARENCY+')';
-            ctxGame.fill();
-            ctxGame.closePath();
+            this.gameScreenControl.drawRectangle(false, {fillStyle: 'rgba(0, 0, 0, '+SHADING_TRANSPARENCY+')', x: wallX, y: wallY, width: wallWidth, height: wallHeight});
         }
     }
 }
 
 class Ray{
-    constructor(rayAngle, rayOrigin, index){
-       this.rayOrigin = rayOrigin;
-       this.rayAngle = rayAngle;
-       this.index = index;
+    constructor(rayAngle, rayOrigin, index, editorControl){
+        this.rayOrigin = rayOrigin;
+        this.rayAngle = rayAngle;
+        this.index = index;
+        this.editorControl = editorControl;
     }
 }
 
@@ -73,14 +71,14 @@ Ray.prototype.cast = function(){
     let nearestHit = this.returnNearestHit(horizontalHit,verticalHit);
 
     if(nearestHit !== undefined)
-        if(raysActivated)
+        if(this.editorControl.gameManager.raysActivated)
             this.drawRayOnEditor(nearestHit);
     
     return nearestHit;
 };
 
 Ray.prototype.drawRayOnEditor = function(nearestHit){
-    editorControl.drawRayLineOnCanvas("#ff0000", this.rayOrigin, nearestHit.hitPoint);
+    this.editorControl.drawRayLineOnCanvas("#ff0000", this.rayOrigin, nearestHit.hitPoint);
 };
 
 Ray.prototype.returnNearestHit = function(hitA,hitB){
@@ -95,8 +93,8 @@ Ray.prototype.returnNearestHit = function(hitA,hitB){
     }else if(hitB !== undefined){
         return hitB;
     }else{
-        if(raysActivated)
-            editorControl.drawRayLineOnCanvas("#afafaf", this.rayOrigin, {x: this.rayOrigin.x + Math.cos(this.rayAngle) * 1000, y: this.rayOrigin.y + Math.sin(this.rayAngle) * -1000});
+        if(RAYS_ACTIVE)
+            this.editorControl.drawRayLineOnCanvas("#afafaf", this.rayOrigin, {x: this.rayOrigin.x + Math.cos(this.rayAngle) * 1000, y: this.rayOrigin.y + Math.sin(this.rayAngle) * -1000});
         return undefined;
     }
 };
@@ -116,7 +114,7 @@ Ray.prototype.findHorizontalHit = function(){
     if(workingHorizontalHitPoint.x < 0 || workingHorizontalHitPoint.x > GRID_DIMENSIONS.x * CELL_SIZE.x)
         return;
 
-    hitCell = grid.returnCellAtCoord(grid.convertToGridCoords({x: workingHorizontalHitPoint.x, y: workingHorizontalHitPoint.y}));
+    hitCell = this.editorControl.grid.returnCellAtCoord(this.editorControl.grid.convertToGridCoords({x: workingHorizontalHitPoint.x, y: workingHorizontalHitPoint.y}));
     if(hitCell){
             if(hitCell.gameObjectOnCell){
                 horizontalHitReturnObject = {
@@ -135,10 +133,10 @@ Ray.prototype.findHorizontalHit = function(){
     //IF NOT HIT IN FIRST, SEARCH OTHER INTERSECTIONS
     while(horizontalHitReturnObject === undefined){
         if(Math.sin(this.rayAngle) > 0){
-            if (limit > Math.floor(player.position.y / CELL_SIZE.x))
+            if (limit > Math.floor(this.rayOrigin.y / CELL_SIZE.x))
                 break;
         }else{
-            if (limit > Math.floor((EDITOR_CANVAS_SIZE.y - player.position.y) / CELL_SIZE.y))
+            if (limit > Math.floor((EDITOR_CANVAS_SIZE.y - this.rayOrigin.y) / CELL_SIZE.y))
                 break;
         }
         limit++;
@@ -149,7 +147,7 @@ Ray.prototype.findHorizontalHit = function(){
         if(workingHorizontalHitPoint.x < 0 || workingHorizontalHitPoint.x > GRID_DIMENSIONS.x * CELL_SIZE.x)
             return;
 
-        hitCell = grid.returnCellAtCoord(grid.convertToGridCoords({x: workingHorizontalHitPoint.x, y: workingHorizontalHitPoint.y}));
+        hitCell = this.editorControl.grid.returnCellAtCoord(this.editorControl.grid.convertToGridCoords({x: workingHorizontalHitPoint.x, y: workingHorizontalHitPoint.y}));
        
         if(hitCell){
             if(hitCell.gameObjectOnCell){
@@ -181,7 +179,7 @@ Ray.prototype.findVerticalHit = function(){
     workingVerticalHitPoint.x = Math.floor(this.rayOrigin.x/CELL_SIZE.x) * CELL_SIZE.x + ((Math.cos(this.rayAngle) > 0) ? CELL_SIZE.x : -0.001);
     workingVerticalHitPoint.y = (this.rayOrigin.y + (this.rayOrigin.x - workingVerticalHitPoint.x)*Math.tan(this.rayAngle));
 
-    hitCell = grid.returnCellAtCoord(grid.convertToGridCoords({x: workingVerticalHitPoint.x, y: workingVerticalHitPoint.y}));
+    hitCell = this.editorControl.grid.returnCellAtCoord(this.editorControl.grid.convertToGridCoords({x: workingVerticalHitPoint.x, y: workingVerticalHitPoint.y}));
     if(hitCell){
             if(hitCell.gameObjectOnCell){
                 verticalHitReturnObject = {
@@ -200,10 +198,10 @@ Ray.prototype.findVerticalHit = function(){
     //IF NOT HIT IN FIRST, SEARCH OTHER INTERSECTIONS
     while(verticalHitReturnObject === undefined){
         if (Math.cos(this.rayAngle) > 0){
-            if (limit > Math.floor((EDITOR_CANVAS_SIZE.x - player.position.x) / CELL_SIZE.x))
+            if (limit > Math.floor((EDITOR_CANVAS_SIZE.x - this.rayOrigin.x) / CELL_SIZE.x))
                 break;
         }else{
-            if (limit > Math.floor(player.position.x / CELL_SIZE.x))
+            if (limit > Math.floor(this.rayOrigin.x / CELL_SIZE.x))
                 break;
         }
         limit++;
@@ -211,7 +209,7 @@ Ray.prototype.findVerticalHit = function(){
         workingVerticalHitPoint.x += ((Math.cos(this.rayAngle) > 0) ? CELL_SIZE.x:  -CELL_SIZE.x);            
         workingVerticalHitPoint.y += ((Math.cos(this.rayAngle) > 0) ? -(CELL_SIZE.x * Math.tan(this.rayAngle)): (CELL_SIZE.x * Math.tan(this.rayAngle)));
 
-        hitCell = grid.returnCellAtCoord(grid.convertToGridCoords({x: workingVerticalHitPoint.x, y: workingVerticalHitPoint.y}));
+        hitCell = this.editorControl.grid.returnCellAtCoord(this.editorControl.grid.convertToGridCoords({x: workingVerticalHitPoint.x, y: workingVerticalHitPoint.y}));
        
         if(hitCell){
             if(hitCell.gameObjectOnCell){

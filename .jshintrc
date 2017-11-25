@@ -19,7 +19,9 @@
       "PLAYER_START_POSITION": true,
       "PLAYER_SIZE": true,
       "SHADING_TRANSPARENCY": true,
+      "RAYS_ACTIVE":true,
       //MAIN.JS
+      "GameManager":true,
       "ctxGame": true,
       "textureMap": true,
       "gameObjectMap": true,
@@ -38,11 +40,14 @@
       //EVENTS.JS
       "mouse": true,
       "KeyboardManager": true,
+      "ClickManager":true,
       "scrollY": true,
       "changeElementSelected": true,
       "toggleRays": true,
       //EDITORS.JS
       "EditorControl":true,
-      "GameScreenControl": true
+      "GameScreenControl": true,
+      //PLAYER.JS
+      "Player":true
     }
 }

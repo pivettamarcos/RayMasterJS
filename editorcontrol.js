@@ -1,5 +1,6 @@
 class EditorControl{
-    constructor(textureMap, updateMiliseconds){
+    constructor(gameManager, textureMap, updateMiliseconds){
+        this.gameManager = gameManager;
         this.textureMap = textureMap;
 
         this.playerCanvas = document.getElementById("playerCanvas");
@@ -11,13 +12,16 @@ class EditorControl{
         this.sidebar = new Sidebar(document.getElementById("sidebar"));
 
         this.grid = new Grid(this, GRID_DIMENSIONS);
-        this.player = new Player(this);
 
         this.updateMiliseconds = updateMiliseconds;
 
-        this.updateClass = setInterval(this.update.bind(this), updateMiliseconds);
+        //this.updateClass = setInterval(this.update.bind(this), updateMiliseconds);
     }
 }
+
+EditorControl.prototype.initializePlayerView = function(player) {
+    this.player = player;
+};
 
 EditorControl.prototype.update = function() {
 	//ctxGrid.clearRect(0, 0, canvasGrid.width, canvasGrid.height);
@@ -60,12 +64,12 @@ EditorControl.prototype.drawRayLineOnCanvas = function(color, origin, destinatio
 	this.ctxPlayer.closePath();
 };
 
-EditorControl.prototype.mouseEvent = function(button, eventType) {
-	switch (eventType) {
-		case mouse.CLICKED:
-			switch (button) {
-				case mouse.MOUSE1:
-					grid.mouseInteraction(mouse.MOUSE1);
+EditorControl.prototype.mouseEvent = function(data) {
+	switch (data.clicked) {
+		case true:
+			switch (data.key) {
+				case 0:
+					this.grid.mouseInteraction(data.key, data.position);
 			}
 	}
 };
@@ -81,14 +85,15 @@ EditorControl.prototype.fillCellGrid = function (attributes){
         this.ctxEditor.rect(attributes.posX, attributes.posY, attributes.sizeX, attributes.sizeY);
         this.ctxEditor.fill();
         this.ctxEditor.stroke();
-    
     }
 	
 	this.ctxEditor.closePath();
 };
 
 class GameScreenControl{
-    constructor(updateMiliseconds){
+    constructor(updateMiliseconds, editorControl){
+        this.editorControl = editorControl;
+
         this.gameScreenCanvas = document.getElementById("gameScreen");
         this.ctxGameScreen = this.gameScreenCanvas.getContext("2d");
 
@@ -96,15 +101,36 @@ class GameScreenControl{
 
         this.updateMiliseconds = updateMiliseconds;
 
-        this.updateClass = setInterval(this.update.bind(this), updateMiliseconds);
+        //this.updateClass = setInterval(this.update.bind(this), updateMiliseconds);
     }
 }
 
+GameScreenControl.prototype.initializePlayerView = function(player){
+    this.player = player;
+    this.playerView = new PlayerView(player.position, this.editorControl, this);
+};
+    
+
 GameScreenControl.prototype.update = function(){
     this.ctxGameScreen.clearRect(0, 0, 1000, 1000);
+    if(this.playerView !== undefined && this.player !== undefined)
+        this.playerView.castRays(this.player.playerFacingAngle);
+
 };
 
-
+GameScreenControl.prototype.drawRectangle = function(isTextured, attributes){
+    if(isTextured){
+        this.ctxGameScreen.beginPath();
+        this.ctxGameScreen.drawImage(attributes.img, attributes.sX, attributes.sY, attributes.sWidth, attributes.sHeight, attributes.x, attributes.y, attributes.width, attributes.height);
+        this.ctxGameScreen.closePath();
+    }else{
+        this.ctxGameScreen.beginPath();
+        this.ctxGameScreen.rect(attributes.x, attributes.y,attributes.width, attributes.height);
+        this.ctxGameScreen.fillStyle = attributes.fillStyle;
+        this.ctxGameScreen.fill();
+        this.ctxGameScreen.closePath();
+    }
+};
 
 
 class Sidebar{
