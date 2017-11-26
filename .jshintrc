@@ -9,6 +9,7 @@
       "console": true,
       "Image": true,
       "setInterval": true,
+      "FileReader": true,
       //CONSTANTS.JS
       "EDITOR_CANVAS_SIZE": true,
       "GRID_DIMENSIONS": true,

@@ -36,6 +36,15 @@ function Grid(editorControl, size){
 		}
 	};
 
+	this.refresh = function refresh(){
+		for(var i = 0; i < this.cells.length; i++){
+			if(this.cells[i].gameObjectOnCell)
+				this.fillGridCellWith(this.cells[i], this.cells[i].gameObjectOnCell.textureLocation);
+			else
+			this.fillGridCellWith(this.cells[i], undefined);
+		}
+	};
+
 	this.returnCellAtCoord = function returnCellAtCoord(worldCoord){
 		return this.cells[worldCoord.x + worldCoord.y * GRID_DIMENSIONS.x];
 	};
@@ -74,10 +83,12 @@ function Grid(editorControl, size){
 				for(let cell of this.cells){
 					if(position.x > cell.position.x - cell.size.x/2 && position.x < cell.position.x + cell.size.x/2 && 
 						position.y + scrollY > cell.position.y - cell.size.y/2 && position.y + scrollY < cell.position.y + cell.size.y/2){
-							if(cell.gameObjectOnCell !== undefined)
+							if(cell.gameObjectOnCell !== undefined){
 								this.removeGameObjectFromCell(cell);
-							else
-								this.addGameObjectToCell(cell, new GameObject(editorControl.gameManager.gameObjectMap[editorControl.gameManager.selection]));
+							}else{
+								if(editorControl.gameManager.gameObjectMap[editorControl.gameManager.selection])
+									this.addGameObjectToCell(cell, new GameObject(editorControl.gameManager.gameObjectMap[editorControl.gameManager.selection]));
+							}
 					}
 				}
 		}
@@ -95,6 +106,7 @@ Grid.prototype.removeGameObjectFromCell = function(cell){
 Grid.prototype.addGameObjectToCell = function(cell, object){
 	console.log("** ((ADD)) gameObject =="+ object.name +"== to cell " + this.convertToGridCoords(cell.position).x + " " + this.convertToGridCoords(cell.position).y  +" **");
 	cell.gameObjectOnCell = object;
+	console.log(object.textureLocation);
 	this.fillGridCellWith(cell, object.textureLocation);
 };
 

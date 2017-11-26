@@ -94,9 +94,9 @@ ClickManager.prototype.listen = function(){
 	    self.position.x = event.clientX;
 	    self.position.y = event.clientY;
     });
-    document.getElementById("editorDiv").addEventListener("mouseup", function(event){
+    /*document.getElementById("editorDiv").addEventListener("mouseup", function(event){
 
-    });
+    });*/
 
 };
 

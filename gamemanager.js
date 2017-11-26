@@ -13,13 +13,13 @@ class GameManager{
 		
 		this.gameObjectMap = [
 			//{ type: "object", textureLocation: [-1, 0] },
-			{ name: "devilish wall", type: "wall", textureLocation: [128, 0] },
-			{ name: "stone wall",type: "wall", textureLocation: [192, 0] },
-			{ name: "blue wall",type: "wall", textureLocation: [256, 0] },
-			{ name: "slimmy wall",type: "wall", textureLocation: [320, 0] },
-			{ name: "wooden wall",type: "wall", textureLocation: [384, 0] },
-			{ name: "stone wall",type: "wall", textureLocation: [448, 0] },
-			{ name: "",type: "wall", textureLocation: [512, 0] }
+			{ name: "devilish wall", type: "wall", textureLocation: [0, 0] },
+			{ name: "stone wall", type: "wall", textureLocation: [128, 0] },
+			{ name: "blue wall",type: "wall", textureLocation: [192, 0] },
+			{ name: "slimmy wall",type: "wall", textureLocation: [256, 0] },
+			{ name: "wooden wall",type: "wall", textureLocation: [320, 0] },
+			{ name: "stone wall",type: "wall", textureLocation: [384, 0] },
+			{ name: "black",type: "wall", textureLocation: [448, 0] }
 		];
 
 		this.setup();
@@ -78,4 +78,16 @@ GameManager.prototype.toggleRays = function(data) {
 		else
 			this.raysActivated = true;
 	}
-}
+};
+
+GameManager.prototype.changeWallTextureMap = function(image){
+	this.textureMap = image;   
+	this.gameObjectMap = [];
+	let i = 0;
+	for(i = 0; i < this.textureMap.width/64; i++){
+		this.gameObjectMap.push({name: i, type: "wall", textureLocation: [i * 64, 0]});
+	}       
+	this.selection = 0;
+	this.editorControl.sidebar.refresh(selectionText = {fontType: "20px Arial",text: "Press buttons 1-"+i, x: 25, y: 200});
+	this.editorControl.grid.refresh();
+};

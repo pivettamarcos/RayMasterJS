@@ -8,7 +8,7 @@ https://pivettamarcos.github.io/RayMasterJS/
 
 ### Planning
 
-@ Ability to add wall texture map
++ Ability to add wall texture map (ADDED IN VERSION 1.1)
 
 @ Ability to add collectables texture map
 
@@ -46,4 +46,12 @@ https://pivettamarcos.github.io/RayMasterJS/
             
       - Option to select between predefined textures
 
+(1.1) 
 
+      - Major refactoring
+
+      - Ability to add wall texture map (Image has to be 64px high and a multiple of 64px in width)
+
+      - Added file browsing button for adding wall texture map
+
+      - Toggleable rays (Use the 'r' key)

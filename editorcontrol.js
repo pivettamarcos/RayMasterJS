@@ -67,7 +67,7 @@ EditorControl.prototype.fillCellGrid = function (attributes){
     this.ctxEditor.beginPath();
 
     if(attributes.texture !== undefined){
-        this.ctxEditor.drawImage(this.textureMap, attributes.texture[0], attributes.texture[1], 64, 64, attributes.posX, attributes.posY, attributes.sizeX, attributes.sizeY);         
+        this.ctxEditor.drawImage(this.gameManager.textureMap, attributes.texture[0], attributes.texture[1], 64, 64, attributes.posX, attributes.posY, attributes.sizeX, attributes.sizeY);         
     }else{
         this.ctxEditor.fillStyle = CELL_EMPTY_FILL_COLOR;    
         this.ctxEditor.strokeStyle = CELL_EMPTY_BORDER_COLOR;
@@ -130,8 +130,18 @@ class Sidebar{
         this.ctxSidebar = sidebarCanvas.getContext('2d');
 
         this.firstDraw();
+        this.setupListeners();
     }
 }
+
+Sidebar.prototype.setupListeners = function(){
+    document.getElementById('getWallMap').addEventListener('change', this.changeWallTextureMap.bind(this), true);
+    
+    document.getElementById("browse-click").onclick = function(){ 
+        document.getElementById("getWallMap").click();
+        return false;
+    };
+};
 
 Sidebar.prototype.firstDraw = function(){
     this.ctxSidebar.beginPath();
@@ -140,6 +150,17 @@ Sidebar.prototype.firstDraw = function(){
 
     this.ctxSidebar.font = "20px Arial";
     this.ctxSidebar.fillText("Press buttons 1-6",25,200);
+};
+
+Sidebar.prototype.refresh  = function (selectionText){
+    this.clearCanvas();
+    this.drawRectangle(true, {img: this.editorControl.gameManager.textureMap, sX: this.editorControl.gameManager.gameObjectMap[0].textureLocation[0], sY: this.editorControl.gameManager.gameObjectMap[0].textureLocation[1], sWidth: 64, sHeight: 64, x: 70, y: 64, width: 64, height:64});     
+	this.ctxSidebar.font = selectionText.fontType;
+    this.ctxSidebar.fillText(selectionText.text,selectionText.x,selectionText.y);
+};
+
+Sidebar.prototype.clearCanvas = function(){
+    this.ctxSidebar.clearRect(0,0, this.ctxSidebar.canvas.clientWidth, this.ctxSidebar.canvas.clientHeight);
 };
 
 Sidebar.prototype.drawRectangle = function(isTextured, attributes){
@@ -153,5 +174,28 @@ Sidebar.prototype.drawRectangle = function(isTextured, attributes){
         this.ctxSidebar.fillStyle = attributes.fillStyle;
         this.ctxSidebar.fill();
         this.ctxSidebar.closePath();
+    }
+};
+
+Sidebar.prototype.changeWallTextureMap = function(){
+    let self = this;
+    let file = document.getElementById("getWallMap").files[0];
+    let reader = new FileReader();
+    console.log(file);
+    reader.onloadend = function(event){
+        console.log(event);
+        let dataUrl = event.target.result;
+
+        let newTextureMap = new Image();
+        newTextureMap.onload = function(){
+            self.editorControl.gameManager.changeWallTextureMap(newTextureMap);
+        };
+        newTextureMap.src = dataUrl;
+    };
+
+    if(file){
+        reader.readAsDataURL(file);
+    }else{
+        //newTextureMap.src = dataUrl;
     }
 };

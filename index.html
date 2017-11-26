@@ -6,10 +6,13 @@
 	    <style>
 	    	* { padding: 0; margin: 0; }
 			#editorDiv { width: 400px; height: 304px; display: block; float: left; position: relative;}
+			#sidebarDiv {width: 200px; height: 304px; display: block; float: left; position: relative;}
 	    	#editorCanvas { background: #707070; width: 400px; height: 304px; position: absolute; top: 0; left: 0;}
 			#playerCanvas { position: absolute; top: 0; left: 0;}
 	    	#gameScreen { background: #707070; display: block; float: left;}
 	    	#sidebar {background: #bfbfbf; display: block; float: left;}
+			#getWallMap{display: none}
+			#browse-click{ background: #996877;position: relative; display:inline-block; padding: 5px 10px 5px 10px; margin-top: 12px; margin-left: 15px}
 	    	#main {height: 600px; width: 600px; border: 1px solid #661111; float: left;}
 	    	span{display: block;float: right;position: relative;z-index:-3;}
 
@@ -23,7 +26,14 @@
 			<canvas id="editorCanvas" width="400px" height="304px"></canvas>	
 			<canvas id="playerCanvas" width="400px" height="304px"></canvas>	
 		</div>
-		<canvas id="sidebar" width="200px" height="304px"></canvas>
+
+		<div id = "sidebarDiv">
+			<canvas id="sidebar" width="200px" height="250px">
+			</canvas>
+
+			<input id="getWallMap" type="file"><br>
+			<input id="browse-click" type="button" class="button" value="Change wall texture map"/>
+		</div>
 		
 		<canvas id="gameScreen" width="600px" height="300px"></canvas>
 	</div>
