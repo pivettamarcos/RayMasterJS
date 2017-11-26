@@ -1,22 +1,12 @@
 /*exported canvas, textureMapCanvas, ctx, playerView, GameObject, changeElementSelected, toggleRays, gameObjectMap*/
 
 class GameManager{
-	constructor(){
-		this.textureMap = new Image();
-		this.textureMap.src = "textures/textureMap.png";
-
-		this.updateMiliseconds = 20;
-
-		
-		this.editorControl = new EditorControl(this, this.textureMap, this.updateMiliseconds);
-		this.gameScreenControl = new GameScreenControl(this.updateMiliseconds, this.editorControl);
-
-		this.player = new Player(this.editorControl, this.gameScreenControl);
-
-		this.gameScreenControl.initializePlayerView(this.player);
-		this.editorControl.player = this.player;
+	constructor(textureMap){
+		this.textureMap = textureMap;
+		this.updateMiliseconds = 15;
 
 		this.selection = 0;
+		this.raysActivated = true;
 
 		this.keyboardManager = new KeyboardManager(this.updateMiliseconds);
 		this.clickManager = new ClickManager(this.updateMiliseconds);	
@@ -42,12 +32,23 @@ GameManager.prototype.updateAll = function(){
 };
 
 GameManager.prototype.setup = function(){
+	this.editorControl = new EditorControl(this, this.textureMap, this.updateMiliseconds);
+	this.gameScreenControl = new GameScreenControl(this.updateMiliseconds, this.editorControl);
+
+	this.player = new Player(this.editorControl, this.gameScreenControl);
+
+	this.gameScreenControl.initializePlayerView(this.player);
+	this.editorControl.player = this.player;
+
 	let self = this;
 	
 	this.keyboardManager.on("move", self.editorControl.player.move.bind(self.editorControl.player));	
 	this.keyboardManager.on("rotate", self.editorControl.player.rotate.bind(self.editorControl.player));	
+	this.keyboardManager.on("changeSelected", self.changeElementSelected.bind(self));	
+	this.keyboardManager.on("toggleRays", self.toggleRays.bind(self));	
 	
 	this.clickManager.on("interactGrid", self.editorControl.mouseEvent.bind(self.editorControl));	
+	
 
 	this.updateClass = setInterval(this.updateAll.bind(self), this.updateMiliseconds);
 };
@@ -60,13 +61,21 @@ class GameObject {
 	}
 }
 
-function changeElementSelected(newValue) {
-	selection = newValue;
-}
+GameManager.prototype.changeElementSelected = function(data) {
+	switch (data.type) {
+		case 'number':
+			this.selection = data.key;
+			if(this.gameObjectMap[this.selection])
+				this.editorControl.sidebar.drawRectangle(true, {img: this.textureMap, sX: this.gameObjectMap[this.selection].textureLocation[0], sY: this.gameObjectMap[this.selection].textureLocation[1], sWidth: 64, sHeight: 64, x: 70, y: 64, width: 64, height:64}); 
+	}
+};
 
-function toggleRays() {
-	if (raysActivated)
-		raysActivated = false;
-	else
-		raysActivated = true;
+GameManager.prototype.toggleRays = function(data) {
+	switch (data.type) {
+		case 'altKey':
+		if (this.raysActivated)
+			this.raysActivated = false;
+		else
+			this.raysActivated = true;
+	}
 }

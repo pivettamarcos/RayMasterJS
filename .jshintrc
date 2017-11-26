@@ -19,7 +19,17 @@
       "PLAYER_START_POSITION": true,
       "PLAYER_SIZE": true,
       "SHADING_TRANSPARENCY": true,
+      "RAYS_ACTIVE":true,
+      "PLAYER_BLIMP_FILL_COLOR":true,
+      "PLAYER_DIRECTION_LINE_WIDTH": true,
+      "PLAYER_DIRECTION_LINE_SIZE": true,
+      "CELL_EMPTY_FILL_COLOR":true,
+      "CELL_EMPTY_BORDER_COLOR":true,
+      "RAY_DEFAULT_LINE_COLOR":true,
+      "RAY_LINE_WIDTH":true,
+      "RAY_INTERCEPTED_LINE_COLOR":true,
       //MAIN.JS
+      "GameManager":true,
       "ctxGame": true,
       "textureMap": true,
       "gameObjectMap": true,
@@ -37,9 +47,15 @@
       "PlayerView": true,
       //EVENTS.JS
       "mouse": true,
-      "keyboard": true,
+      "KeyboardManager": true,
+      "ClickManager":true,
       "scrollY": true,
       "changeElementSelected": true,
-      "toggleRays": true
+      "toggleRays": true,
+      //EDITORS.JS
+      "EditorControl":true,
+      "GameScreenControl": true,
+      //PLAYER.JS
+      "Player":true
     }
 }
