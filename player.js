@@ -15,7 +15,6 @@ function Player(editorControl, gameScreenControl) {
     };
 
     this.playerFacingAngle = Math.PI / 2; //90 degrees
-    //this.playerView = new PlayerView(this.position, this.editorControl, this.gameScreenControl);
 
     this.turningAngle = Math.PI / 100;
 

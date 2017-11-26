@@ -9,13 +9,11 @@ class EditorControl{
         this.editorCanvas = document.getElementById("editorCanvas");
         this.ctxEditor = this.editorCanvas.getContext("2d");
 
-        this.sidebar = new Sidebar(document.getElementById("sidebar"));
+        this.sidebar = new Sidebar(document.getElementById("sidebar"), this);
 
         this.grid = new Grid(this, GRID_DIMENSIONS);
 
         this.updateMiliseconds = updateMiliseconds;
-
-        //this.updateClass = setInterval(this.update.bind(this), updateMiliseconds);
     }
 }
 
@@ -24,43 +22,34 @@ EditorControl.prototype.initializePlayerView = function(player) {
 };
 
 EditorControl.prototype.update = function() {
-	//ctxGrid.clearRect(0, 0, canvasGrid.width, canvasGrid.height);
-	this.ctxPlayer.clearRect(0, 0, 1000, 1000);
-
-	this.sidebar.ctxSidebar.clearRect(0, 0, this.sidebar.width, this.sidebar.height);
-	this.sidebar.ctxSidebar.clearRect(0, 0, 1000, 1000);
-	//ctx.drawImage(textureMap,10,10);
-	//mouse.update();
-    this.drawPlayer();
+    this.clearCanvases();
+    this.drawPlayerBlimp();
 };
 
-EditorControl.prototype.drawPlayer = function(){
-    this.ctxPlayer.beginPath();
-    this.ctxPlayer.rect(this.player.returnDrawCenter().x, this.player.returnDrawCenter().y, this.player.size.x, this.player.size.y);
-    this.ctxPlayer.fillStyle = this.player.color;
-    this.ctxPlayer.fill();
-    this.ctxPlayer.closePath();
-
-    this.ctxPlayer.beginPath();
-    this.ctxPlayer.strokeStyle = "#0000ff";
-    this.ctxPlayer.lineWidth=3;			
-    this.ctxPlayer.moveTo(this.player.position.x, this.player.position.y);
-    this.ctxPlayer.lineTo(this.player.position.x + Math.cos(this.player.playerFacingAngle) * 50, this.player.position.y + Math.sin(this.player.playerFacingAngle) * - 50);
-    this.ctxPlayer.stroke();
+EditorControl.prototype.clearCanvases = function(){
+    this.ctxPlayer.clearRect(0, 0, this.ctxPlayer.canvas.clientWidth, this.ctxPlayer.canvas.clientHeight);
+    this.sidebar.ctxSidebar.clearRect(0, 0, this.sidebar.width, this.sidebar.height);
 };
 
-EditorControl.prototype.drawRayLineOnCanvas = function(color, origin, destination){
-	this.ctxPlayer.beginPath();
-	this.ctxPlayer.rect(destination.x - 1, destination.y - 1, 4, 4);
-	this.ctxPlayer.fillStyle = "#ffaa00";
-	this.ctxPlayer.fill();
-	this.ctxPlayer.closePath();
+EditorControl.prototype.drawPlayerBlimp = function(){
+    this.drawRectangle(this.player.color, this.player.returnDrawCenter(), this.player.size);
+    this.drawLine(PLAYER_BLIMP_FILL_COLOR, PLAYER_DIRECTION_LINE_WIDTH, this.player.position, {x: this.player.position.x + Math.cos(this.player.playerFacingAngle) * PLAYER_DIRECTION_LINE_SIZE, y:this.player.position.y + Math.sin(this.player.playerFacingAngle) * -PLAYER_DIRECTION_LINE_SIZE});
+};
 
-	this.ctxPlayer.beginPath();
+EditorControl.prototype.drawLine = function(color, lineWidth, origin, destination){
+    this.ctxPlayer.beginPath();
 	this.ctxPlayer.strokeStyle = color;
 	this.ctxPlayer.moveTo(origin.x, origin.y);
 	this.ctxPlayer.lineTo(destination.x, destination.y);
 	this.ctxPlayer.stroke();
+	this.ctxPlayer.closePath();
+};
+
+EditorControl.prototype.drawRectangle = function(color, origin, size){
+    this.ctxPlayer.beginPath();
+	this.ctxPlayer.rect(origin.x, origin.y, size.x, size.y);
+	this.ctxPlayer.fillStyle = color;
+	this.ctxPlayer.fill();
 	this.ctxPlayer.closePath();
 };
 
@@ -76,12 +65,13 @@ EditorControl.prototype.mouseEvent = function(data) {
 
 EditorControl.prototype.fillCellGrid = function (attributes){    
     this.ctxEditor.beginPath();
-    this.ctxEditor.fillStyle = "#ffffff";    
-	this.ctxEditor.strokeStyle = "#000000";
 
     if(attributes.texture !== undefined){
         this.ctxEditor.drawImage(this.textureMap, attributes.texture[0], attributes.texture[1], 64, 64, attributes.posX, attributes.posY, attributes.sizeX, attributes.sizeY);         
     }else{
+        this.ctxEditor.fillStyle = CELL_EMPTY_FILL_COLOR;    
+        this.ctxEditor.strokeStyle = CELL_EMPTY_BORDER_COLOR;
+
         this.ctxEditor.rect(attributes.posX, attributes.posY, attributes.sizeX, attributes.sizeY);
         this.ctxEditor.fill();
         this.ctxEditor.stroke();
@@ -100,8 +90,6 @@ class GameScreenControl{
         this.ctxGameScreen.imageSmoothingEnabled = false;
 
         this.updateMiliseconds = updateMiliseconds;
-
-        //this.updateClass = setInterval(this.update.bind(this), updateMiliseconds);
     }
 }
 
@@ -110,12 +98,15 @@ GameScreenControl.prototype.initializePlayerView = function(player){
     this.playerView = new PlayerView(player.position, this.editorControl, this);
 };
     
-
 GameScreenControl.prototype.update = function(){
-    this.ctxGameScreen.clearRect(0, 0, 1000, 1000);
+    this.clearCanvas();
+
     if(this.playerView !== undefined && this.player !== undefined)
         this.playerView.castRays(this.player.playerFacingAngle);
+};
 
+GameScreenControl.prototype.clearCanvas = function(){
+    this.ctxGameScreen.clearRect(0, 0, this.ctxGameScreen.canvas.clientWidth, this.ctxGameScreen.canvas.clientHeight); 
 };
 
 GameScreenControl.prototype.drawRectangle = function(isTextured, attributes){
@@ -132,20 +123,35 @@ GameScreenControl.prototype.drawRectangle = function(isTextured, attributes){
     }
 };
 
-
 class Sidebar{
-    constructor(sidebarCanvas){
+    constructor(sidebarCanvas, editorControl){
+        this.editorControl = editorControl;
         this.canvas = sidebarCanvas;
         this.ctxSidebar = sidebarCanvas.getContext('2d');
+
+        this.firstDraw();
     }
 }
 
-Sidebar.prototype.update = function(){
+Sidebar.prototype.firstDraw = function(){
     this.ctxSidebar.beginPath();
-
-    if(gameObjectMap[selection])
-        this.ctxSidebar.drawImage(textureMap, gameObjectMap[selection].textureLocation[0], gameObjectMap[selection].textureLocation[1], 64, 64, 70, 64, 64,64); 
+    if(this.editorControl.gameManager.gameObjectMap[this.editorControl.gameManager.selection])
+        this.drawRectangle(true, {img: this.editorControl.gameManager.textureMap, sX: this.editorControl.gameManager.gameObjectMap[this.editorControl.gameManager.selection].textureLocation[0], sY: this.editorControl.gameManager.gameObjectMap[this.editorControl.gameManager.selection].textureLocation[1], sWidth: 64, sHeight: 64, x: 70, y: 64, width: 64, height:64}); 
 
     this.ctxSidebar.font = "20px Arial";
-    this.ctxSidebar.fillText("Press buttons 1-7",25,200);
+    this.ctxSidebar.fillText("Press buttons 1-6",25,200);
+};
+
+Sidebar.prototype.drawRectangle = function(isTextured, attributes){
+    if(isTextured){
+        this.ctxSidebar.beginPath();
+        this.ctxSidebar.drawImage(attributes.img, attributes.sX, attributes.sY, attributes.sWidth, attributes.sHeight, attributes.x, attributes.y, attributes.width, attributes.height);
+        this.ctxSidebar.closePath();
+    }else{
+        this.ctxSidebar.beginPath();
+        this.ctxSidebar.rect(attributes.x, attributes.y,attributes.width, attributes.height);
+        this.ctxSidebar.fillStyle = attributes.fillStyle;
+        this.ctxSidebar.fill();
+        this.ctxSidebar.closePath();
+    }
 };

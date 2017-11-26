@@ -8,21 +8,29 @@ https://pivettamarcos.github.io/RayMasterJS/
 
 ### Planning
 
-@ Shading 
+@ Ability to add wall texture map
 
-@ More sprites
+@ Ability to add collectables texture map
 
-@ More customization
+@ Ability to add monsters texture map
+
+@ Sliding doors and sliding walls
 
 @ Gun and shooting logic
 
+@ Customizable shading
+
+@ Customize gun range, accuracy, etc from player and enemies
+
 @ Ability to add enemies to game world, enemy logic and rendering
 
-@ Ability to add collectable to game world, item logic and rendering
+@ Ability to add collectables to game world, item logic and rendering
 
 @ Floor and ceiling textured casting
 
 @ Mobile responsiveness
+
+@ Saving changes on server
 
 ### Versions
 

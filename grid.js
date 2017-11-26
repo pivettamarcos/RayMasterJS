@@ -87,14 +87,13 @@ function Grid(editorControl, size){
 }
 
 Grid.prototype.removeGameObjectFromCell = function(cell){
-	console.log(cell);
+	console.log("** ((REMOV)) gameObject =="+ cell.gameObjectOnCell.name +"== from cell " + this.convertToGridCoords(cell.position).x + " " + this.convertToGridCoords(cell.position).y  +" **");	
 	cell.gameObjectOnCell = undefined;
 	this.fillGridCellWith(cell, undefined);
 };
 
 Grid.prototype.addGameObjectToCell = function(cell, object){
-	//console.log("** ((ADDED)) game object =="+ object.name +"== to cell " + this.convertToGridCoords(this.position.x) + " " + this.convertToGridCoords(this.position.y)  +" **");
-	console.log(object);
+	console.log("** ((ADD)) gameObject =="+ object.name +"== to cell " + this.convertToGridCoords(cell.position).x + " " + this.convertToGridCoords(cell.position).y  +" **");
 	cell.gameObjectOnCell = object;
 	this.fillGridCellWith(cell, object.textureLocation);
 };
@@ -108,29 +107,3 @@ Grid.prototype.fillGridCellWith = function(cell, texture){
 		this.editorControl.fillCellGrid(fillAttributes);
 	}
 };
-
-class Cell{
-	constructor(position){
-		this.position = {};
-		this.position.x = position.x;
-		this.position.y = position.y;
-
-		this.size = {};
-		this.size.x = CELL_SIZE.x;
-		this.size.y = CELL_SIZE.y;
-
-		this.selection = undefined;
-
-		this.gameObjectOnCell = undefined;
-
-		this.unfilledCellColor = "#FFFFFF";
-	}
-}
-
-Cell.prototype.returnDrawCenter = function(){
-	let drawCenter = {};
-	drawCenter.x = this.position.x - this.size.x/2;
-	drawCenter.y = this.position.y - this.size.y/2;
-	return drawCenter;
-};
-

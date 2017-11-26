@@ -69,7 +69,6 @@ Ray.prototype.cast = function(){
     let verticalHit = this.findVerticalHit();   
 
     let nearestHit = this.returnNearestHit(horizontalHit,verticalHit);
-
     if(nearestHit !== undefined)
         if(this.editorControl.gameManager.raysActivated)
             this.drawRayOnEditor(nearestHit);
@@ -78,7 +77,7 @@ Ray.prototype.cast = function(){
 };
 
 Ray.prototype.drawRayOnEditor = function(nearestHit){
-    this.editorControl.drawRayLineOnCanvas("#ff0000", this.rayOrigin, nearestHit.hitPoint);
+    this.editorControl.drawLine(RAY_DEFAULT_LINE_COLOR, RAY_LINE_WIDTH, this.rayOrigin, nearestHit.hitPoint);
 };
 
 Ray.prototype.returnNearestHit = function(hitA,hitB){
@@ -93,8 +92,8 @@ Ray.prototype.returnNearestHit = function(hitA,hitB){
     }else if(hitB !== undefined){
         return hitB;
     }else{
-        if(RAYS_ACTIVE)
-            this.editorControl.drawRayLineOnCanvas("#afafaf", this.rayOrigin, {x: this.rayOrigin.x + Math.cos(this.rayAngle) * 1000, y: this.rayOrigin.y + Math.sin(this.rayAngle) * -1000});
+        if(this.editorControl.gameManager.raysActivated)
+            this.editorControl.drawLine(RAY_INTERCEPTED_LINE_COLOR, RAY_LINE_WIDTH, this.rayOrigin, {x: this.rayOrigin.x + Math.cos(this.rayAngle) * 1000, y: this.rayOrigin.y + Math.sin(this.rayAngle) * -1000});
         return undefined;
     }
 };
