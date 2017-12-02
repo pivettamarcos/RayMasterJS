@@ -10,29 +10,10 @@ window.onload = function () {
         textureMap.onload = function(){
             callback(textureMap);
         };
-        textureMap.src = "textures/textureMap.png";
+        textureMap.src = DEFAULT_ASSET_TEXTURE_MAP;
     };
 
     loadAssets(loadGameManager);
-
-    /*function readURL(){
-        var file = document.getElementById("getWallMap").files[0];
-        var reader = new FileReader();
-        reader.onloadend = function(event){
-            let dataUrl = event.target.result;
-            let img = new Image();
-            img.src = dataUrl;
-    
-            gameManager.textureMap = img;
-            //document.getElementById('clock').style.backgroundImage = "url(" + reader.result + ")";        
-        };
-    
-        if(file){
-            reader.readAsDataURL(file);
-        }else{
-    
-        }
-    }*/
 };
 
 

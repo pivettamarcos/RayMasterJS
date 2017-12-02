@@ -11,6 +11,7 @@
       "setInterval": true,
       "FileReader": true,
       //CONSTANTS.JS
+      "DEFAULT_ASSET_TEXTURE_MAP":true,
       "EDITOR_CANVAS_SIZE": true,
       "GRID_DIMENSIONS": true,
       "GAME_CANVAS_SIZE": true,

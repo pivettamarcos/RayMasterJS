@@ -27,30 +27,13 @@ EditorControl.prototype.update = function() {
 };
 
 EditorControl.prototype.clearCanvases = function(){
-    this.ctxPlayer.clearRect(0, 0, this.ctxPlayer.canvas.clientWidth, this.ctxPlayer.canvas.clientHeight);
-    this.sidebar.ctxSidebar.clearRect(0, 0, this.sidebar.width, this.sidebar.height);
+    globalFunctions.drawOn2DContext(this.ctxPlayer, "clear", {x: 0, y: 0, width: this.ctxPlayer.canvas.clientWidth, height: this.ctxPlayer.canvas.clientHeight});
 };
 
 EditorControl.prototype.drawPlayerBlimp = function(){
-    this.drawRectangle(this.player.color, this.player.returnDrawCenter(), this.player.size);
-    this.drawLine(PLAYER_BLIMP_FILL_COLOR, PLAYER_DIRECTION_LINE_WIDTH, this.player.position, {x: this.player.position.x + Math.cos(this.player.playerFacingAngle) * PLAYER_DIRECTION_LINE_SIZE, y:this.player.position.y + Math.sin(this.player.playerFacingAngle) * -PLAYER_DIRECTION_LINE_SIZE});
-};
-
-EditorControl.prototype.drawLine = function(color, lineWidth, origin, destination){
-    this.ctxPlayer.beginPath();
-	this.ctxPlayer.strokeStyle = color;
-	this.ctxPlayer.moveTo(origin.x, origin.y);
-	this.ctxPlayer.lineTo(destination.x, destination.y);
-	this.ctxPlayer.stroke();
-	this.ctxPlayer.closePath();
-};
-
-EditorControl.prototype.drawRectangle = function(color, origin, size){
-    this.ctxPlayer.beginPath();
-	this.ctxPlayer.rect(origin.x, origin.y, size.x, size.y);
-	this.ctxPlayer.fillStyle = color;
-	this.ctxPlayer.fill();
-	this.ctxPlayer.closePath();
+    globalFunctions.drawOn2DContext(this.ctxPlayer, "rectangle", {strokeWidth: 0, fillColor: PLAYER_BLIMP_FILL_COLOR, strokeColor: undefined, x: this.player.returnDrawCenter().x, y: this.player.returnDrawCenter().y, width: this.player.size.x, height: this.player.size.y});
+    globalFunctions.drawOn2DContext(this.ctxPlayer, "line", {strokeWidth: PLAYER_DIRECTION_LINE_WIDTH, strokeColor: PLAYER_DIRECTION_LINE_COLOR, origin: {x: this.player.position.x, y:this.player.position.y}, 
+        destination: {x: this.player.position.x + Math.cos(this.player.playerFacingAngle) * PLAYER_DIRECTION_LINE_SIZE,y: this.player.position.y + Math.sin(this.player.playerFacingAngle) * -PLAYER_DIRECTION_LINE_SIZE}});
 };
 
 EditorControl.prototype.mouseEvent = function(data) {
@@ -67,14 +50,12 @@ EditorControl.prototype.fillCellGrid = function (attributes){
     this.ctxEditor.beginPath();
 
     if(attributes.texture !== undefined){
-        this.ctxEditor.drawImage(this.gameManager.textureMap, attributes.texture[0], attributes.texture[1], 64, 64, attributes.posX, attributes.posY, attributes.sizeX, attributes.sizeY);         
+        globalFunctions.drawOn2DContext(this.ctxEditor, "image", {image: this.gameManager.textureMap, ix: attributes.texture[0], iy: attributes.texture[1], iwidth: DEFAULT_TEXTUREMAP_UNIT_WIDTH, iheight: DEFAULT_TEXTUREMAP_UNIT_HEIGHT, 
+            x: attributes.posX, y: attributes.posY, width: attributes.sizeX, height: attributes.sizeY});        
+        //this.ctxEditor.drawImage(this.gameManager.textureMap, attributes.texture[0], attributes.texture[1], 64, 64, attributes.posX, attributes.posY, attributes.sizeX, attributes.sizeY);         
     }else{
-        this.ctxEditor.fillStyle = CELL_EMPTY_FILL_COLOR;    
-        this.ctxEditor.strokeStyle = CELL_EMPTY_BORDER_COLOR;
-
-        this.ctxEditor.rect(attributes.posX, attributes.posY, attributes.sizeX, attributes.sizeY);
-        this.ctxEditor.fill();
-        this.ctxEditor.stroke();
+        globalFunctions.drawOn2DContext(this.ctxEditor, "rectangle", {strokeWidth: 1, strokeColor: CELL_EMPTY_BORDER_COLOR, fillColor: CELL_EMPTY_FILL_COLOR,
+            x: attributes.posX, y: attributes.posY, width: attributes.sizeX-1, height: attributes.sizeY-1});
     }
 	
 	this.ctxEditor.closePath();
@@ -106,22 +87,10 @@ GameScreenControl.prototype.update = function(){
 };
 
 GameScreenControl.prototype.clearCanvas = function(){
-    this.ctxGameScreen.clearRect(0, 0, this.ctxGameScreen.canvas.clientWidth, this.ctxGameScreen.canvas.clientHeight); 
+    globalFunctions.drawOn2DContext(this.ctxGameScreen, "clear", {x: 0,y: 0,width: this.ctxGameScreen.canvas.clientWidth, height: this.ctxGameScreen.canvas.clientHeight});
 };
 
-GameScreenControl.prototype.drawRectangle = function(isTextured, attributes){
-    if(isTextured){
-        this.ctxGameScreen.beginPath();
-        this.ctxGameScreen.drawImage(attributes.img, attributes.sX, attributes.sY, attributes.sWidth, attributes.sHeight, attributes.x, attributes.y, attributes.width, attributes.height);
-        this.ctxGameScreen.closePath();
-    }else{
-        this.ctxGameScreen.beginPath();
-        this.ctxGameScreen.rect(attributes.x, attributes.y,attributes.width, attributes.height);
-        this.ctxGameScreen.fillStyle = attributes.fillStyle;
-        this.ctxGameScreen.fill();
-        this.ctxGameScreen.closePath();
-    }
-};
+
 
 class Sidebar{
     constructor(sidebarCanvas, editorControl){
@@ -163,64 +132,36 @@ Sidebar.prototype.setupListeners = function(){
 };
 
 Sidebar.prototype.firstDraw = function(){
-    this.ctxSidebar.beginPath();
-    if(this.editorControl.gameManager.globalGameObjectMap[this.editorControl.gameManager.selection])
-        this.drawRectangle(true, {img: this.editorControl.gameManager.textureMap, sX: this.editorControl.gameManager.globalGameObjectMap[this.editorControl.gameManager.selection].textureLocation[0], sY: this.editorControl.gameManager.globalGameObjectMap[this.editorControl.gameManager.selection].textureLocation[1], sWidth: 64, sHeight: 64, x: 70, y: 64, width: 64, height:64}); 
-
-    this.ctxSidebar.font = "20px Arial";
-    this.ctxSidebar.fillText("Press buttons 1-6",25,200);
     this.populateWallUnits(this.editorControl.gameManager.globalGameObjectMap);
     this.selectCurrentWorkingGameObject(0);
 };
 
-Sidebar.prototype.refreshAll  = function (selectionText){
-    this.clearCanvas(0,0, this.ctxSidebar.canvas.clientWidth, this.ctxSidebar.canvas.clientHeight);
-    this.drawRectangle(true, {img: this.editorControl.gameManager.textureMap, sX: this.editorControl.gameManager.globalGameObjectMap[0].textureLocation[0], sY: this.editorControl.gameManager.globalGameObjectMap[0].textureLocation[1], sWidth: 64, sHeight: 64, x: 70, y: 64, width: 64, height:64});     
-	this.ctxSidebar.font = selectionText.fontType;
-    this.ctxSidebar.fillText(selectionText.text,selectionText.x,selectionText.y);
-};
-
-Sidebar.prototype.refreshTexture = function(){
-    this.clearCanvas(70,64,64,64);
-};
-
-Sidebar.prototype.clearCanvas = function(x,y,w,h){
-    this.ctxSidebar.clearRect(x,y, w,h);
-};
-
-Sidebar.prototype.drawRectangle = function(isTextured, attributes){
-    if(isTextured){
-        this.ctxSidebar.beginPath();
-        this.ctxSidebar.drawImage(attributes.img, attributes.sX, attributes.sY, attributes.sWidth, attributes.sHeight, attributes.x, attributes.y, attributes.width, attributes.height);
-        this.ctxSidebar.closePath();
-    }else{
-        this.ctxSidebar.beginPath();
-        this.ctxSidebar.rect(attributes.x, attributes.y,attributes.width, attributes.height);
-        this.ctxSidebar.fillStyle = attributes.fillStyle;
-        this.ctxSidebar.fill();
-        this.ctxSidebar.closePath();
-    }
-};
-
 Sidebar.prototype.populateWallUnits = function(wallMap){
     let self = this;
-    document.getElementById("wallUnits").innerHTML = "";
+    let wallUnitsDiv =  document.getElementById("wallUnits");
+    wallUnitsDiv.innerHTML = "";
     let finalWidth = 4;
+
     for(let wallUnit of wallMap){
         let wallUnitCanvas = document.createElement("canvas");
         wallUnitCanvas.data = wallUnit;
-        document.getElementById("wallUnits").appendChild(wallUnitCanvas);
+        wallUnitsDiv.appendChild(wallUnitCanvas);
 
-        wallUnitCanvas.width = 25;
-        wallUnitCanvas.height = 25;
+        wallUnitCanvas.width = DEFAULT_WALLUNIT_WIDTH;
+        wallUnitCanvas.height = DEFAULT_WALLUNIT_HEIGHT;
         wallUnitCanvas.addEventListener("click", function(e){
             e.toElement.style.border = "1px solid red";
             self.selectCurrentWorkingGameObject(this.data.index);
         });
-        finalWidth += 25;
+        finalWidth += DEFAULT_WALLUNIT_WIDTH;
+
+        globalFunctions.drawOn2DContext(wallUnitCanvas.getContext("2d"), "image", {image: this.editorControl.gameManager.textureMap, ix: wallUnit.textureLocation[0], iy: wallUnit.textureLocation[1], iwidth: DEFAULT_TEXTUREMAP_UNIT_WIDTH, iheight: DEFAULT_TEXTUREMAP_UNIT_HEIGHT, 
+            x: 0, y: 0, width: DEFAULT_WALLUNIT_WIDTH, height: DEFAULT_WALLUNIT_HEIGHT});  
+
         wallUnitCanvas.getContext("2d").drawImage(this.editorControl.gameManager.textureMap, wallUnit.textureLocation[0], wallUnit.textureLocation[1], 64, 64, 0, 0, 25,25);        
     }
-    console.log(document.getElementById("wallUnits").style.width = finalWidth + "px");
+
+   wallUnitsDiv.style.width = finalWidth + "px";
 };
 
 Sidebar.prototype.selectCurrentWorkingGameObject = function(selection){
@@ -234,17 +175,16 @@ Sidebar.prototype.selectCurrentWorkingGameObject = function(selection){
         document.getElementById("wallUnits").children[x].style.border = "0px";
         if(x == selection){
             let option1,option2;
+            option1 = document.createElement("option");
+            option2 = document.createElement("option");
             if(document.getElementById("wallUnits").children[x].data.type == "wall"){
-                option1 = document.createElement("option");
+                this.showSpriteOptions(document.getElementById("wallUnits").children[x].data, false);
+                this.showWallOptions(document.getElementById("wallUnits").children[x].data,true);
                 option1.text = "wall";
-    
-                option2 = document.createElement("option");
                 option2.text = "sprite";
             }else if("sprite"){
-                option1 = document.createElement("option");
+                this.showSpriteOptions(document.getElementById("wallUnits").children[x].data, true);
                 option1.text = "sprite";
-    
-                option2 = document.createElement("option");
                 option2.text = "wall";
             }
 
@@ -260,31 +200,27 @@ Sidebar.prototype.selectCurrentWorkingGameObject = function(selection){
 Sidebar.prototype.changeGameObjectAttribute = function(attribute){
     if(document.getElementById("gameObjectType").options[document.getElementById("gameObjectType").selectedIndex]){
         console.log(attribute);
+        let gameObjectSelected = this.editorControl.gameManager.globalGameObjectMap[this.editorControl.gameManager.selection];
+
         if(attribute == "type"){
             let selectedType = document.getElementById("gameObjectType").options[document.getElementById("gameObjectType").selectedIndex].value;
             if(selectedType == "wall"){
-                document.getElementById("isCollectableSpriteDiv").style.display = 'none';     
-                document.getElementById("isBlockSpriteDiv").style.display = 'none';     
-                this.editorControl.gameManager.globalGameObjectMap[this.editorControl.gameManager.selection].type = selectedType;
+                this.showSpriteOptions(gameObjectSelected, false);
+                this.showWallOptions(gameObjectSelected,true);
+                gameObjectSelected.type = selectedType;
             }else if(selectedType == "sprite"){
-                let collectableSelect = document.getElementById("isCollectableSpriteDiv");
-                let blockableSelect = document.getElementById("isBlockSpriteDiv");
-                
-                collectableSelect.style.display = 'block';
-                blockableSelect.style.display = 'block';
-
-                this.editorControl.gameManager.globalGameObjectMap[this.editorControl.gameManager.selection].type = selectedType;        
+                this.showSpriteOptions(gameObjectSelected, true);
+                gameObjectSelected.type = selectedType;        
             }
         }else if(attribute == "collectability"){
             let selectedType = document.getElementById("isCollectableSpriteSelect").options[document.getElementById("isCollectableSpriteSelect").selectedIndex].value;
-            let booleanAnswer = (selectedType == "yes" ? true : false)
-            this.editorControl.gameManager.globalGameObjectMap[this.editorControl.gameManager.selection].isCollectable = booleanAnswer;        
+            let booleanAnswer = (selectedType == "yes" ? true : false);
+            gameObjectSelected.isCollectable = booleanAnswer;        
         }else if(attribute == "blockabillity"){
             let selectedType = document.getElementById("isBlockSpriteSelect").options[document.getElementById("isBlockSpriteSelect").selectedIndex].value;
-            console.log(selectedType);
-            
+
             let booleanAnswer = (selectedType == "yes" ? true : false) ;           
-            this.editorControl.gameManager.globalGameObjectMap[this.editorControl.gameManager.selection].block = booleanAnswer;                        
+            gameObjectSelected.block = booleanAnswer;                        
         }
     }
 };
@@ -311,5 +247,76 @@ Sidebar.prototype.changeWallTextureMap = function(){
         reader.readAsDataURL(file);
     }else{
         //newTextureMap.src = dataUrl;
+    }
+};
+
+Sidebar.prototype.showSpriteOptions = function(gameObjectSelected, show){
+    let collectableDiv = document.getElementById("isCollectableSpriteDiv");
+    let blockableDiv = document.getElementById("isBlockSpriteDiv");
+    
+    let collectableSelect = document.getElementById("isCollectableSpriteSelect");
+    let blockableSelect = document.getElementById("isBlockSpriteSelect");
+    if(show){
+        collectableDiv.style.display = 'block';
+        collectableSelect.innerHTML = "";
+
+        let option1,option2;
+        option1 = document.createElement("option");
+        option2 = document.createElement("option");
+        console.log(gameObjectSelected.isCollectable);
+        if(gameObjectSelected.isCollectable){
+            option1.text = "yes";
+            option2.text = "no";
+        }else{
+            option1.text = "no";
+            option2.text = "yes";
+        }
+        collectableSelect.add(option1);
+        collectableSelect.add(option2);
+        console.log(collectableSelect);
+
+        blockableDiv.style.display = 'block';
+        blockableSelect.innerHTML = "";
+        
+        option1 = document.createElement("option");
+        option2 = document.createElement("option");
+        if(gameObjectSelected.block){
+            option1.text = "yes";
+            option2.text = "no";
+        }else{
+            option1.text = "no";
+            option2.text = "yes";
+        }
+        blockableSelect.add(option1);
+        blockableSelect.add(option2);
+    }else{
+        collectableDiv.style.display = 'none';
+        blockableDiv.style.display = 'none';
+    }
+}
+
+Sidebar.prototype.showWallOptions = function(gameObjectSelected, show){
+    let blockableDiv = document.getElementById("isBlockSpriteDiv");
+    
+    let blockableSelect = document.getElementById("isBlockSpriteSelect");
+    if(show){
+        let option1, option2;
+        blockableDiv.style.display = 'block';
+        blockableSelect.innerHTML = "";
+        
+        option1 = document.createElement("option");
+        option2 = document.createElement("option");
+        if(gameObjectSelected.block){
+            option1.text = "yes";
+            option2.text = "no";
+        }else{
+            option1.text = "no";
+            option2.text = "yes";
+        }
+        blockableSelect.add(option1);
+        blockableSelect.add(option2);
+        console.log(blockableSelect);
+    }else{
+        blockableDiv.style.display = 'none';
     }
 };

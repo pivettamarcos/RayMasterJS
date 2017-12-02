@@ -11,7 +11,6 @@ class GameManager{
 		this.keyboardManager = new KeyboardManager(this.updateMiliseconds);
 		this.clickManager = new ClickManager(this.updateMiliseconds);	
 		
-		
 		this.globalGameObjectMap = [
 			//{ type: "object", textureLocation: [-1, 0] },
 			{ index:0, name: "devilish wall", type: "wall", textureLocation: [0, 0], block: true, isCollectable: false},
@@ -68,10 +67,6 @@ class GameObject {
 
 GameManager.prototype.changeElementSelected = function(index) {
 	this.selection = index;
-	if(this.globalGameObjectMap[this.selection]){
-		this.editorControl.sidebar.refreshTexture();
-		this.editorControl.sidebar.drawRectangle(true, {img: this.textureMap, sX: this.globalGameObjectMap[this.selection].textureLocation[0], sY: this.globalGameObjectMap[this.selection].textureLocation[1], sWidth: 64, sHeight: 64, x: 70, y: 64, width: 64, height:64}); 
-	}
 };
 
 GameManager.prototype.toggleRays = function(data) {
@@ -92,6 +87,5 @@ GameManager.prototype.changeWallTextureMap = function(image){
 		this.globalGameObjectMap.push({index: i, name: i, type: "wall", textureLocation: [i * 64, 0], isCollectable: false, block: true});
 	}       
 	this.selection = 0;
-	this.editorControl.sidebar.refreshAll(selectionText = {fontType: "20px Arial",text: "Press buttons 1-"+i, x: 25, y: 200});
 	this.editorControl.grid.refresh();
 };

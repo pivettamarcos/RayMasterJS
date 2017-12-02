@@ -67,8 +67,8 @@ class PlayerView{
 
         var x = Math.tan(spriteAngle) * this.distanceToProjectionPlane;
 
-        this.gameScreenControl.drawRectangle(true, {img: this.editorControl.gameManager.textureMap, sX: spriteInfo.hitCell.gameObjectOnCell.textureLocation[0] + 1, sY: spriteInfo.hitCell.gameObjectOnCell.textureLocation[1], 
-            sWidth: 63, sHeight: 64, x: GAME_CANVAS_SIZE.x/2 - x - size/2, y: GAME_CANVAS_SIZE.y/2 - size/2, width: size, height: size});
+        globalFunctions.drawOn2DContext(this.gameScreenControl.ctxGameScreen, "image", {image: this.editorControl.gameManager.textureMap, ix: spriteInfo.hitCell.gameObjectOnCell.textureLocation[0] + 1, iy: spriteInfo.hitCell.gameObjectOnCell.textureLocation[1], iwidth: DEFAULT_TEXTUREMAP_UNIT_WIDTH - 1, iheight: DEFAULT_TEXTUREMAP_UNIT_HEIGHT, 
+            x: GAME_CANVAS_SIZE.x/2 - x - size/2, y:  GAME_CANVAS_SIZE.y/2 - size/2, width: size, height: size});     
     }
 
     drawColumn(rayReturnObject, playerFacingAngle){
@@ -89,11 +89,11 @@ class PlayerView{
             textureColumnOffset = Math.floor((rayReturnObject.hitPoint.y % CELL_SIZE.x) * 4);
         }
 
-        this.gameScreenControl.drawRectangle(true, {img: this.editorControl.gameManager.textureMap, sX: rayReturnObject.hitCell.gameObjectOnCell.textureLocation[0] + textureColumnOffset, sY: rayReturnObject.hitCell.gameObjectOnCell.textureLocation[1], 
-            sWidth: 1, sHeight: 64, x: wallX, y: wallY, width: wallWidth, height: wallHeight});
+        globalFunctions.drawOn2DContext(this.gameScreenControl.ctxGameScreen, "image", {image: this.editorControl.gameManager.textureMap, ix: rayReturnObject.hitCell.gameObjectOnCell.textureLocation[0] + textureColumnOffset, iy: rayReturnObject.hitCell.gameObjectOnCell.textureLocation[1], iwidth: 1, iheight: DEFAULT_TEXTUREMAP_UNIT_HEIGHT, 
+            x: wallX, y: wallY, width: wallWidth, height: wallHeight});        
 
         if(isHorizontal){
-            this.gameScreenControl.drawRectangle(false, {fillStyle: 'rgba(0, 0, 0, '+SHADING_TRANSPARENCY+')', x: wallX, y: wallY, width: wallWidth, height: wallHeight});
+            globalFunctions.drawOn2DContext(this.gameScreenControl.ctxGameScreen, "rectangle", {fillColor: 'rgba(0, 0, 0, '+SHADING_TRANSPARENCY+')',x: wallX, y: wallY, width: wallWidth, height: wallHeight});      
         }
     }
 }
@@ -119,7 +119,9 @@ Ray.prototype.cast = function(){
 };
 
 Ray.prototype.drawRayOnEditor = function(nearestHit){
-    this.editorControl.drawLine(RAY_DEFAULT_LINE_COLOR, RAY_LINE_WIDTH, this.rayOrigin, nearestHit.hitPoint);
+    globalFunctions.drawOn2DContext(this.editorControl.ctxPlayer, "line", {strokeWidth: RAY_LINE_WIDTH, strokeColor: RAY_DEFAULT_LINE_COLOR,
+        origin:{x: this.rayOrigin.x, y: this.rayOrigin.y}, destination:{x:nearestHit.hitPoint.x, y: nearestHit.hitPoint.y}});
+  //this.editorControl.drawLine(RAY_DEFAULT_LINE_COLOR, RAY_LINE_WIDTH, this.rayOrigin, nearestHit.hitPoint);
 };
 
 Ray.prototype.returnNearestHit = function(hitA,hitB){
@@ -135,7 +137,9 @@ Ray.prototype.returnNearestHit = function(hitA,hitB){
         return hitB;
     }else{
         if(this.editorControl.gameManager.raysActivated)
-            this.editorControl.drawLine(RAY_INTERCEPTED_LINE_COLOR, RAY_LINE_WIDTH, this.rayOrigin, {x: this.rayOrigin.x + Math.cos(this.rayAngle) * 1000, y: this.rayOrigin.y + Math.sin(this.rayAngle) * -1000});
+            globalFunctions.drawOn2DContext(this.editorControl.ctxPlayer, "line", {strokeWidth: RAY_LINE_WIDTH, strokeColor: RAY_INTERCEPTED_LINE_COLOR,
+                origin:{x: this.rayOrigin.x, y: this.rayOrigin.y}, destination:{x:this.rayOrigin.x + Math.cos(this.rayAngle) * 1000, y: this.rayOrigin.y + Math.sin(this.rayAngle) * -1000}});
+            
         return undefined;
     }
 };
@@ -328,5 +332,4 @@ Ray.prototype.isAGreaterThanB = function(a,b){
             return true;
     }
     return false;
-
 };
