@@ -49,7 +49,7 @@ const PLAYER_DIRECTION_LINE_WIDTH = 3;
 const PLAYER_DIRECTION_LINE_SIZE = 50;
 
 //RAYS
-const NUM_RAYS = 300; //columns drawn on game canvas
+const NUM_RAYS = 200; //columns drawn on game canvas
 const FOCAL_LENGTH = (Math.PI / 3); // 60 degrees
 const RAY_DEFAULT_LINE_COLOR = "#ff0000";
 const RAY_INTERCEPTED_LINE_COLOR = "#afafaf";

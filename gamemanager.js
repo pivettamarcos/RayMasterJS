@@ -6,20 +6,21 @@ class GameManager{
 		this.updateMiliseconds = 15;
 
 		this.selection = 0;
-		this.raysActivated = true;
+		this.raysActivated = false;
 
 		this.keyboardManager = new KeyboardManager(this.updateMiliseconds);
 		this.clickManager = new ClickManager(this.updateMiliseconds);	
 		
-		this.gameObjectMap = [
+		
+		this.globalGameObjectMap = [
 			//{ type: "object", textureLocation: [-1, 0] },
-			{ name: "devilish wall", type: "wall", textureLocation: [0, 0] },
-			{ name: "stone wall", type: "wall", textureLocation: [128, 0] },
-			{ name: "blue wall",type: "wall", textureLocation: [192, 0] },
-			{ name: "slimmy wall",type: "wall", textureLocation: [256, 0] },
-			{ name: "wooden wall",type: "wall", textureLocation: [320, 0] },
-			{ name: "stone wall",type: "wall", textureLocation: [384, 0] },
-			{ name: "black",type: "wall", textureLocation: [448, 0] }
+			{ index:0, name: "devilish wall", type: "wall", textureLocation: [0, 0], block: true, isCollectable: false},
+			{ index:1, name: "stone wall", type: "wall", textureLocation: [128, 0], block: true, isCollectable: false },
+			{ index:2, name: "blue wall",type: "wall", textureLocation: [192, 0], block: true, isCollectable: false },
+			{ index:3, name: "slimmy wall",type: "wall", textureLocation: [256, 0], block: true, isCollectable: false },
+			{ index:4, name: "wooden wall",type: "wall", textureLocation: [320, 0], block: true, isCollectable: false },
+			{ index:5, name: "stone wall",type: "wall", textureLocation: [384, 0], block: true, isCollectable: false },
+			{ index:6, name: "black",type: "wall", textureLocation: [448, 0], block: true, isCollectable: false }
 		];
 
 		this.setup();
@@ -33,6 +34,7 @@ GameManager.prototype.updateAll = function(){
 
 GameManager.prototype.setup = function(){
 	this.editorControl = new EditorControl(this, this.textureMap, this.updateMiliseconds);
+	this.editorControl.sidebar.firstDraw();
 	this.gameScreenControl = new GameScreenControl(this.updateMiliseconds, this.editorControl);
 
 	this.player = new Player(this.editorControl, this.gameScreenControl);
@@ -55,18 +57,20 @@ GameManager.prototype.setup = function(){
 
 class GameObject {
 	constructor(gameObjectMap) {
+		this.index = gameObjectMap.index;
 		this.name = gameObjectMap.name;
 		this.type = gameObjectMap.type;
 		this.textureLocation = gameObjectMap.textureLocation;
+		this.block = gameObjectMap.block;
+		this.isCollectable = gameObjectMap.isCollectable;
 	}
 }
 
-GameManager.prototype.changeElementSelected = function(data) {
-	switch (data.type) {
-		case 'number':
-			this.selection = data.key;
-			if(this.gameObjectMap[this.selection])
-				this.editorControl.sidebar.drawRectangle(true, {img: this.textureMap, sX: this.gameObjectMap[this.selection].textureLocation[0], sY: this.gameObjectMap[this.selection].textureLocation[1], sWidth: 64, sHeight: 64, x: 70, y: 64, width: 64, height:64}); 
+GameManager.prototype.changeElementSelected = function(index) {
+	this.selection = index;
+	if(this.globalGameObjectMap[this.selection]){
+		this.editorControl.sidebar.refreshTexture();
+		this.editorControl.sidebar.drawRectangle(true, {img: this.textureMap, sX: this.globalGameObjectMap[this.selection].textureLocation[0], sY: this.globalGameObjectMap[this.selection].textureLocation[1], sWidth: 64, sHeight: 64, x: 70, y: 64, width: 64, height:64}); 
 	}
 };
 
@@ -82,12 +86,12 @@ GameManager.prototype.toggleRays = function(data) {
 
 GameManager.prototype.changeWallTextureMap = function(image){
 	this.textureMap = image;   
-	this.gameObjectMap = [];
+	this.globalGameObjectMap = [];
 	let i = 0;
 	for(i = 0; i < this.textureMap.width/64; i++){
-		this.gameObjectMap.push({name: i, type: "wall", textureLocation: [i * 64, 0]});
+		this.globalGameObjectMap.push({index: i, name: i, type: "wall", textureLocation: [i * 64, 0], isCollectable: false, block: true});
 	}       
 	this.selection = 0;
-	this.editorControl.sidebar.refresh(selectionText = {fontType: "20px Arial",text: "Press buttons 1-"+i, x: 25, y: 200});
+	this.editorControl.sidebar.refreshAll(selectionText = {fontType: "20px Arial",text: "Press buttons 1-"+i, x: 25, y: 200});
 	this.editorControl.grid.refresh();
 };
