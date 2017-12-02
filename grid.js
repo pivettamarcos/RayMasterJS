@@ -69,7 +69,7 @@ function Grid(editorControl, size){
 			let cellCollided = this.returnCellAtCoord(this.returnCoordAtPos(points[i].x, points[i].y));
 			if(cellCollided){
 				if(cellCollided.gameObjectOnCell){
-					collisionObjects.push({object: cellCollided.gameObjectOnCell, point: i});
+					collisionObjects.push({cellCollided: cellCollided, point: i});
 				}
 			}
 		}
@@ -86,8 +86,9 @@ function Grid(editorControl, size){
 							if(cell.gameObjectOnCell !== undefined){
 								this.removeGameObjectFromCell(cell);
 							}else{
-								if(editorControl.gameManager.gameObjectMap[editorControl.gameManager.selection])
-									this.addGameObjectToCell(cell, new GameObject(editorControl.gameManager.gameObjectMap[editorControl.gameManager.selection]));
+								console.log(editorControl.gameManager);
+								if(editorControl.gameManager.globalGameObjectMap[editorControl.gameManager.selection])
+									this.addGameObjectToCell(cell, new GameObject(editorControl.gameManager.globalGameObjectMap[editorControl.gameManager.selection]));
 							}
 					}
 				}
@@ -119,3 +120,10 @@ Grid.prototype.fillGridCellWith = function(cell, texture){
 		this.editorControl.fillCellGrid(fillAttributes);
 	}
 };
+
+Grid.prototype.changeGameObjectsvisiblity = function(option){
+	for(var i = 0; i < this.cells.length; i++){
+		if(this.cells[i].gameObjectOnCell)
+			this.cells[i].gameObjectOnCell.isVisible = option;
+	}
+}	

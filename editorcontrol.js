@@ -129,38 +129,63 @@ class Sidebar{
         this.canvas = sidebarCanvas;
         this.ctxSidebar = sidebarCanvas.getContext('2d');
 
-        this.firstDraw();
+        //this.firstDraw();
         this.setupListeners();
     }
 }
 
 Sidebar.prototype.setupListeners = function(){
+    let self = this;
     document.getElementById('getWallMap').addEventListener('change', this.changeWallTextureMap.bind(this), true);
     
     document.getElementById("browse-click").onclick = function(){ 
         document.getElementById("getWallMap").click();
         return false;
     };
+
+
+    document.getElementById('gameObjectType').addEventListener('change', function(){
+        let changeGameObjectAttributeBinded = self.changeGameObjectAttribute.bind(self);
+        changeGameObjectAttributeBinded("type");
+    }, true);
+
+    document.getElementById('isCollectableSpriteSelect').addEventListener('change', function(){
+        let changeGameObjectAttributeBinded = self.changeGameObjectAttribute.bind(self);
+        changeGameObjectAttributeBinded("collectability");
+    }, true);
+
+    document.getElementById('isBlockSpriteSelect').addEventListener('change', function(){
+        let changeGameObjectAttributeBinded = self.changeGameObjectAttribute.bind(self);
+        changeGameObjectAttributeBinded("blockabillity");
+    }, true);
+    //document.getElementById('gameObjectType').addEventListener('change', changeGameObjectAttributeBinded("type"), true);  
+    //document.getElementById('isCollectableSpriteSelect').addEventListener('change', changeGameObjectAttributeBinded("collectability"), true);        
 };
 
 Sidebar.prototype.firstDraw = function(){
     this.ctxSidebar.beginPath();
-    if(this.editorControl.gameManager.gameObjectMap[this.editorControl.gameManager.selection])
-        this.drawRectangle(true, {img: this.editorControl.gameManager.textureMap, sX: this.editorControl.gameManager.gameObjectMap[this.editorControl.gameManager.selection].textureLocation[0], sY: this.editorControl.gameManager.gameObjectMap[this.editorControl.gameManager.selection].textureLocation[1], sWidth: 64, sHeight: 64, x: 70, y: 64, width: 64, height:64}); 
+    if(this.editorControl.gameManager.globalGameObjectMap[this.editorControl.gameManager.selection])
+        this.drawRectangle(true, {img: this.editorControl.gameManager.textureMap, sX: this.editorControl.gameManager.globalGameObjectMap[this.editorControl.gameManager.selection].textureLocation[0], sY: this.editorControl.gameManager.globalGameObjectMap[this.editorControl.gameManager.selection].textureLocation[1], sWidth: 64, sHeight: 64, x: 70, y: 64, width: 64, height:64}); 
 
     this.ctxSidebar.font = "20px Arial";
     this.ctxSidebar.fillText("Press buttons 1-6",25,200);
+    this.populateWallUnits(this.editorControl.gameManager.globalGameObjectMap);
+    this.selectCurrentWorkingGameObject(0);
 };
 
-Sidebar.prototype.refresh  = function (selectionText){
-    this.clearCanvas();
-    this.drawRectangle(true, {img: this.editorControl.gameManager.textureMap, sX: this.editorControl.gameManager.gameObjectMap[0].textureLocation[0], sY: this.editorControl.gameManager.gameObjectMap[0].textureLocation[1], sWidth: 64, sHeight: 64, x: 70, y: 64, width: 64, height:64});     
+Sidebar.prototype.refreshAll  = function (selectionText){
+    this.clearCanvas(0,0, this.ctxSidebar.canvas.clientWidth, this.ctxSidebar.canvas.clientHeight);
+    this.drawRectangle(true, {img: this.editorControl.gameManager.textureMap, sX: this.editorControl.gameManager.globalGameObjectMap[0].textureLocation[0], sY: this.editorControl.gameManager.globalGameObjectMap[0].textureLocation[1], sWidth: 64, sHeight: 64, x: 70, y: 64, width: 64, height:64});     
 	this.ctxSidebar.font = selectionText.fontType;
     this.ctxSidebar.fillText(selectionText.text,selectionText.x,selectionText.y);
 };
 
-Sidebar.prototype.clearCanvas = function(){
-    this.ctxSidebar.clearRect(0,0, this.ctxSidebar.canvas.clientWidth, this.ctxSidebar.canvas.clientHeight);
+Sidebar.prototype.refreshTexture = function(){
+    this.clearCanvas(70,64,64,64);
+};
+
+Sidebar.prototype.clearCanvas = function(x,y,w,h){
+    this.ctxSidebar.clearRect(x,y, w,h);
 };
 
 Sidebar.prototype.drawRectangle = function(isTextured, attributes){
@@ -177,6 +202,93 @@ Sidebar.prototype.drawRectangle = function(isTextured, attributes){
     }
 };
 
+Sidebar.prototype.populateWallUnits = function(wallMap){
+    let self = this;
+    document.getElementById("wallUnits").innerHTML = "";
+    let finalWidth = 4;
+    for(let wallUnit of wallMap){
+        let wallUnitCanvas = document.createElement("canvas");
+        wallUnitCanvas.data = wallUnit;
+        document.getElementById("wallUnits").appendChild(wallUnitCanvas);
+
+        wallUnitCanvas.width = 25;
+        wallUnitCanvas.height = 25;
+        wallUnitCanvas.addEventListener("click", function(e){
+            e.toElement.style.border = "1px solid red";
+            self.selectCurrentWorkingGameObject(this.data.index);
+        });
+        finalWidth += 25;
+        wallUnitCanvas.getContext("2d").drawImage(this.editorControl.gameManager.textureMap, wallUnit.textureLocation[0], wallUnit.textureLocation[1], 64, 64, 0, 0, 25,25);        
+    }
+    console.log(document.getElementById("wallUnits").style.width = finalWidth + "px");
+};
+
+Sidebar.prototype.selectCurrentWorkingGameObject = function(selection){
+    this.editorControl.gameManager.changeElementSelected(selection);
+
+    document.getElementById("isCollectableSpriteDiv").style.display = 'none';     
+    document.getElementById("isBlockSpriteDiv").style.display = 'none';     
+
+    document.getElementById("gameObjectType").innerHTML = "";
+    for(let x = 0; x < document.getElementById("wallUnits").children.length; x++){
+        document.getElementById("wallUnits").children[x].style.border = "0px";
+        if(x == selection){
+            let option1,option2;
+            if(document.getElementById("wallUnits").children[x].data.type == "wall"){
+                option1 = document.createElement("option");
+                option1.text = "wall";
+    
+                option2 = document.createElement("option");
+                option2.text = "sprite";
+            }else if("sprite"){
+                option1 = document.createElement("option");
+                option1.text = "sprite";
+    
+                option2 = document.createElement("option");
+                option2.text = "wall";
+            }
+
+            document.getElementById("wallUnits").children[x].style.border = "2px solid #0000ff";
+
+            let select = document.getElementById("gameObjectType");
+            select.add(option1);
+            select.add(option2);
+        }
+    }
+};
+
+Sidebar.prototype.changeGameObjectAttribute = function(attribute){
+    if(document.getElementById("gameObjectType").options[document.getElementById("gameObjectType").selectedIndex]){
+        console.log(attribute);
+        if(attribute == "type"){
+            let selectedType = document.getElementById("gameObjectType").options[document.getElementById("gameObjectType").selectedIndex].value;
+            if(selectedType == "wall"){
+                document.getElementById("isCollectableSpriteDiv").style.display = 'none';     
+                document.getElementById("isBlockSpriteDiv").style.display = 'none';     
+                this.editorControl.gameManager.globalGameObjectMap[this.editorControl.gameManager.selection].type = selectedType;
+            }else if(selectedType == "sprite"){
+                let collectableSelect = document.getElementById("isCollectableSpriteDiv");
+                let blockableSelect = document.getElementById("isBlockSpriteDiv");
+                
+                collectableSelect.style.display = 'block';
+                blockableSelect.style.display = 'block';
+
+                this.editorControl.gameManager.globalGameObjectMap[this.editorControl.gameManager.selection].type = selectedType;        
+            }
+        }else if(attribute == "collectability"){
+            let selectedType = document.getElementById("isCollectableSpriteSelect").options[document.getElementById("isCollectableSpriteSelect").selectedIndex].value;
+            let booleanAnswer = (selectedType == "yes" ? true : false)
+            this.editorControl.gameManager.globalGameObjectMap[this.editorControl.gameManager.selection].isCollectable = booleanAnswer;        
+        }else if(attribute == "blockabillity"){
+            let selectedType = document.getElementById("isBlockSpriteSelect").options[document.getElementById("isBlockSpriteSelect").selectedIndex].value;
+            console.log(selectedType);
+            
+            let booleanAnswer = (selectedType == "yes" ? true : false) ;           
+            this.editorControl.gameManager.globalGameObjectMap[this.editorControl.gameManager.selection].block = booleanAnswer;                        
+        }
+    }
+};
+
 Sidebar.prototype.changeWallTextureMap = function(){
     let self = this;
     let file = document.getElementById("getWallMap").files[0];
@@ -189,6 +301,8 @@ Sidebar.prototype.changeWallTextureMap = function(){
         let newTextureMap = new Image();
         newTextureMap.onload = function(){
             self.editorControl.gameManager.changeWallTextureMap(newTextureMap);
+            self.populateWallUnits(self.editorControl.gameManager.globalGameObjectMap);
+            self.selectCurrentWorkingGameObject(0);            
         };
         newTextureMap.src = dataUrl;
     };
