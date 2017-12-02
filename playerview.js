@@ -10,22 +10,65 @@ class PlayerView{
     }
 
     castRays(playerFacingAngle){
-        let rayReturnObjects = [];
+        this.editorControl.grid.changeGameObjectsvisiblity(false);
+
+        let rayReturnObjects = {walls: [], sprites: []};
         for(let i = 0; i < NUM_RAYS; i++){
             let rayAngle = (playerFacingAngle + FOCAL_LENGTH/2) - i * this.angleBetweenRays;
             let currentRay = new Ray(rayAngle, this.raysOrigin, i, this.editorControl);
-                        
-            rayReturnObjects.push(currentRay.cast());
+            let rayCast = currentRay.cast();       
+            rayReturnObjects.walls.push(rayCast.nearestWall);
+            rayReturnObjects.sprites.push(rayCast.spritesHit);
         }
-
         this.drawWorld(rayReturnObjects, playerFacingAngle);
     }
 
     drawWorld(rayReturnObjects, playerFacingAngle){
-        for(let rayReturnObject of rayReturnObjects){
-            if(rayReturnObject)
-                this.drawColumn(rayReturnObject, playerFacingAngle);
+        let drawableObjects = [];
+        for(let rayReturnObject of rayReturnObjects.walls){
+            if(rayReturnObject){
+                drawableObjects.push(rayReturnObject);
+            }
         }
+        for(let rayReturnObject of rayReturnObjects.sprites){
+            for(let spriteInfo of rayReturnObject){
+                if(spriteInfo)
+                drawableObjects.push(spriteInfo);
+            }
+        }
+
+        drawableObjects.sort(this.compare);        
+
+        for(let drawableObject of drawableObjects){
+            if(drawableObject){
+                if(drawableObject.hitPoint)
+                    this.drawColumn(drawableObject, playerFacingAngle);
+                else
+                    this.drawSprite(drawableObject, playerFacingAngle);
+            }
+        }
+    }
+
+    compare(a,b) {
+        if (a.hitDistance > b.hitDistance)
+           return -1;
+        if (a.hitDistance < b.hitDistance)
+          return 1;
+        return 0;
+      }
+
+    drawSprite(spriteInfo, playerFacingAngle){
+        var dx = spriteInfo.hitCell.position.x - this.editorControl.gameManager.player.position.x;
+		var dy = spriteInfo.hitCell.position.y - this.editorControl.gameManager.player.position.y;
+
+		var dist = spriteInfo.hitDistance;
+		var spriteAngle = (Math.atan2(dy,dx)*-1) - playerFacingAngle;
+        var size = ((CELL_SIZE.x  / dist) * this.distanceToProjectionPlane);
+
+        var x = Math.tan(spriteAngle) * this.distanceToProjectionPlane;
+
+        this.gameScreenControl.drawRectangle(true, {img: this.editorControl.gameManager.textureMap, sX: spriteInfo.hitCell.gameObjectOnCell.textureLocation[0] + 1, sY: spriteInfo.hitCell.gameObjectOnCell.textureLocation[1], 
+            sWidth: 63, sHeight: 64, x: GAME_CANVAS_SIZE.x/2 - x - size/2, y: GAME_CANVAS_SIZE.y/2 - size/2, width: size, height: size});
     }
 
     drawColumn(rayReturnObject, playerFacingAngle){
@@ -61,19 +104,18 @@ class Ray{
         this.rayAngle = rayAngle;
         this.index = index;
         this.editorControl = editorControl;
+        this.spriteReturnObject = [];
     }
 }
 
 Ray.prototype.cast = function(){
     let horizontalHit = this.findHorizontalHit();
     let verticalHit = this.findVerticalHit();   
-
     let nearestHit = this.returnNearestHit(horizontalHit,verticalHit);
     if(nearestHit !== undefined)
         if(this.editorControl.gameManager.raysActivated)
             this.drawRayOnEditor(nearestHit);
-    
-    return nearestHit;
+    return {nearestWall: nearestHit, spritesHit: this.spriteReturnObject};
 };
 
 Ray.prototype.drawRayOnEditor = function(nearestHit){
@@ -116,14 +158,28 @@ Ray.prototype.findHorizontalHit = function(){
     hitCell = this.editorControl.grid.returnCellAtCoord(this.editorControl.grid.convertToGridCoords({x: workingHorizontalHitPoint.x, y: workingHorizontalHitPoint.y}));
     if(hitCell){
             if(hitCell.gameObjectOnCell){
-                horizontalHitReturnObject = {
-                    hitPoint: workingHorizontalHitPoint,
-                    hitCell: hitCell,
-                    hitDistance: Math.sqrt(Math.pow(this.rayOrigin.x - workingHorizontalHitPoint.x,2) + Math.pow(this.rayOrigin.y - workingHorizontalHitPoint.y,2)),
-                    index: this.index,
-                    rayAngle: this.rayAngle,
-                    intersectionType: "horizontal"
-                };
+                switch(hitCell.gameObjectOnCell.type){
+                    
+                    case "wall":
+                        horizontalHitReturnObject = {
+                            hitPoint: workingHorizontalHitPoint,
+                            hitCell: hitCell,
+                            hitDistance: Math.sqrt(Math.pow(this.rayOrigin.x - workingHorizontalHitPoint.x,2) + Math.pow(this.rayOrigin.y - workingHorizontalHitPoint.y,2)),
+                            index: this.index,
+                            rayAngle: this.rayAngle,
+                            intersectionType: "horizontal"
+                        };
+                        break;
+                    case "sprite":
+                        if(!hitCell.gameObjectOnCell.isVisible){
+                            let spriteInfo = {
+                                hitCell: hitCell,
+                                hitDistance: Math.sqrt(Math.pow(this.rayOrigin.x - hitCell.position.x,2) + Math.pow(this.rayOrigin.y - hitCell.position.y,2))                                
+                            };
+                            this.spriteReturnObject.push(spriteInfo);
+                            hitCell.gameObjectOnCell.isVisible = true;
+                        }
+                }
             }
     }
 
@@ -150,14 +206,27 @@ Ray.prototype.findHorizontalHit = function(){
        
         if(hitCell){
             if(hitCell.gameObjectOnCell){
-                horizontalHitReturnObject = {
-                    hitPoint: workingHorizontalHitPoint,
-                    hitCell: hitCell,
-                    hitDistance: Math.sqrt(Math.pow(this.rayOrigin.x - workingHorizontalHitPoint.x,2) + Math.pow(this.rayOrigin.y - workingHorizontalHitPoint.y,2)),
-                    index: this.index,
-                    rayAngle: this.rayAngle,
-                    intersectionType: "horizontal"
-                };
+                switch(hitCell.gameObjectOnCell.type){
+                    case "wall":
+                        horizontalHitReturnObject = {
+                            hitPoint: workingHorizontalHitPoint,
+                            hitCell: hitCell,
+                            hitDistance: Math.sqrt(Math.pow(this.rayOrigin.x - workingHorizontalHitPoint.x,2) + Math.pow(this.rayOrigin.y - workingHorizontalHitPoint.y,2)),
+                            index: this.index,
+                            rayAngle: this.rayAngle,
+                            intersectionType: "horizontal"
+                        };
+                    break;
+                    case "sprite":
+                        if(!hitCell.gameObjectOnCell.isVisible){
+                            let spriteInfo = {
+                                hitCell: hitCell,
+                                hitDistance: Math.sqrt(Math.pow(this.rayOrigin.x - hitCell.position.x,2) + Math.pow(this.rayOrigin.y - hitCell.position.y,2))                                
+                            };
+                            this.spriteReturnObject.push(spriteInfo);
+                            hitCell.gameObjectOnCell.isVisible = true;
+                        }
+                }
             }
         }
     }
@@ -181,14 +250,27 @@ Ray.prototype.findVerticalHit = function(){
     hitCell = this.editorControl.grid.returnCellAtCoord(this.editorControl.grid.convertToGridCoords({x: workingVerticalHitPoint.x, y: workingVerticalHitPoint.y}));
     if(hitCell){
             if(hitCell.gameObjectOnCell){
-                verticalHitReturnObject = {
-                    hitPoint: workingVerticalHitPoint,
-                    hitCell: hitCell,
-                    hitDistance: Math.sqrt(Math.pow(this.rayOrigin.x - workingVerticalHitPoint.x,2) + Math.pow(this.rayOrigin.y - workingVerticalHitPoint.y,2)),
-                    index: this.index,
-                    rayAngle: this.rayAngle,
-                    intersectionType: "vertical"
-                };
+                switch(hitCell.gameObjectOnCell.type){
+                    case "wall":
+                    verticalHitReturnObject = {
+                        hitPoint: workingVerticalHitPoint,
+                        hitCell: hitCell,
+                        hitDistance: Math.sqrt(Math.pow(this.rayOrigin.x - workingVerticalHitPoint.x,2) + Math.pow(this.rayOrigin.y - workingVerticalHitPoint.y,2)),
+                        index: this.index,
+                        rayAngle: this.rayAngle,
+                        intersectionType: "vertical"
+                    };
+                    break;
+                    case "sprite": 
+                        if(!hitCell.gameObjectOnCell.isVisible){
+                            let spriteInfo = {
+                                hitCell: hitCell,
+                                hitDistance: Math.sqrt(Math.pow(this.rayOrigin.x - hitCell.position.x,2) + Math.pow(this.rayOrigin.y - hitCell.position.y,2))                                
+                            };
+                            this.spriteReturnObject.push(spriteInfo);
+                            hitCell.gameObjectOnCell.isVisible = true;
+                        }
+                }
             }
     }
 
@@ -212,14 +294,27 @@ Ray.prototype.findVerticalHit = function(){
        
         if(hitCell){
             if(hitCell.gameObjectOnCell){
-                verticalHitReturnObject = {
-                    hitPoint: workingVerticalHitPoint,
-                    hitCell: hitCell,
-                    hitDistance: Math.sqrt(Math.pow(this.rayOrigin.x - workingVerticalHitPoint.x,2) + Math.pow(this.rayOrigin.y - workingVerticalHitPoint.y,2)),
-                    index: this.index,
-                    rayAngle: this.rayAngle,
-                    intersectionType: "vertical"                        
-                };
+                switch(hitCell.gameObjectOnCell.type){
+                    case "wall":
+                        verticalHitReturnObject = {
+                            hitPoint: workingVerticalHitPoint,
+                            hitCell: hitCell,
+                            hitDistance: Math.sqrt(Math.pow(this.rayOrigin.x - workingVerticalHitPoint.x,2) + Math.pow(this.rayOrigin.y - workingVerticalHitPoint.y,2)),
+                            index: this.index,
+                            rayAngle: this.rayAngle,
+                            intersectionType: "vertical"                        
+                        };
+                    break;
+                    case "sprite":
+                        if(!hitCell.gameObjectOnCell.isVisible){
+                            let spriteInfo = {
+                                hitCell: hitCell,
+                                hitDistance: Math.sqrt(Math.pow(this.rayOrigin.x - hitCell.position.x,2) + Math.pow(this.rayOrigin.y - hitCell.position.y,2))                                
+                            };
+                            this.spriteReturnObject.push(spriteInfo);
+                            hitCell.gameObjectOnCell.isVisible = true;
+                        }
+                }
             }
         }
     }

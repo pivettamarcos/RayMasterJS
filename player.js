@@ -42,11 +42,27 @@ function Player(editorControl, gameScreenControl) {
         }
 
         let nextPosCollisionPoints = this.returnCollisionPoints(nextPos.x, nextPos.y);
+        let collisionObjects = editorControl.grid.returnGameObjectsWithinPoints(nextPosCollisionPoints);
 
-        if (editorControl.grid.returnGameObjectsWithinPoints(nextPosCollisionPoints).length > 0) {
-            if (editorControl.grid.returnGameObjectsWithinPoints(this.returnCollisionPoints(nextPos.x, this.position.y)).length <= 0) {
+        if (collisionObjects.length > 0) {
+            let hasBlockable = false;
+            for(let collisionObject of collisionObjects){
+                if(collisionObject.cellCollided.gameObjectOnCell){
+                    if(collisionObject.cellCollided.gameObjectOnCell.block)
+                        hasBlockable = true;
+
+                    if(collisionObject.cellCollided.gameObjectOnCell.isCollectable)
+                        this.editorControl.grid.removeGameObjectFromCell(collisionObject.cellCollided);
+                }
+            }
+            if(hasBlockable){
+                if (editorControl.grid.returnGameObjectsWithinPoints(this.returnCollisionPoints(nextPos.x, this.position.y)).length <= 0) {
+                    this.position.x = nextPos.x;
+                } else if (editorControl.grid.returnGameObjectsWithinPoints(this.returnCollisionPoints(this.position.x, nextPos.y)).length <= 0) {
+                    this.position.y = nextPos.y;
+                }
+            }else{
                 this.position.x = nextPos.x;
-            } else if (editorControl.grid.returnGameObjectsWithinPoints(this.returnCollisionPoints(this.position.x, nextPos.y)).length <= 0) {
                 this.position.y = nextPos.y;
             }
         } else {

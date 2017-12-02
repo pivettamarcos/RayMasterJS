@@ -4,16 +4,18 @@
 	    <meta charset="utf-8" />
 	    <title>	Test Game </title>
 	    <style>
-	    	* { padding: 0; margin: 0; }
+	    	html * { padding: 0; margin: 0; color: #444444 !important;font-family: Helvetica !important}
 			#editorDiv { width: 400px; height: 304px; display: block; float: left; position: relative;}
-			#sidebarDiv {width: 200px; height: 304px; display: block; float: left; position: relative;}
+			#sidebarDiv {width: 300px; height: 304px; display: block; float: left; position: relative;}
 	    	#editorCanvas { background: #707070; width: 400px; height: 304px; position: absolute; top: 0; left: 0;}
 			#playerCanvas { position: absolute; top: 0; left: 0;}
 	    	#gameScreen { background: #707070; display: block; float: left;}
 	    	#sidebar {background: #bfbfbf; display: block; float: left;}
 			#getWallMap{display: none}
-			#browse-click{ background: #996877;position: relative; display:inline-block; padding: 5px 10px 5px 10px; margin-top: 12px; margin-left: 15px}
-	    	#main {height: 600px; width: 600px; border: 1px solid #661111; float: left;}
+			#wallUnits{display:block; margin: 0 auto;height:25px;margin-bottom: 10px}
+			#gameObjectType{margin-left: 20px}
+			#browse-click{display:block; background: #ffffff; border: 2px solid #666666; padding: 5px 10px 5px 10px; margin: 0 auto}
+	    	#main {height: 604px; width: 700px; border: 1px solid #bbbbbb; float: left;}
 	    	span{display: block;float: right;position: relative;z-index:-3;}
 
 	    	#cellInfo {height: 50px; width: 50px; background: #444444; margin: 0 auto; position: relative; margin-top: 10px;}
@@ -28,11 +30,29 @@
 		</div>
 
 		<div id = "sidebarDiv">
-			<canvas id="sidebar" width="200px" height="250px">
+			<canvas id="sidebar" width="0" height="0">
 			</canvas>
 
 			<input id="getWallMap" type="file"><br>
-			<input id="browse-click" type="button" class="button" value="Change wall texture map"/>
+			<input id="browse-click" type="button" class="button" value="Change texture map"/>
+			<div style="margin: 5px; padding: 10px; border: 1px solid #cccccc">
+				<div id="wallUnits"></div>
+				<div style="padding: 3px; border: 1px solid #dddddd">
+					<b>Type: </b><select style="width: 60px;float:right;margin-right: 100px;" id="gameObjectType"></select>
+					<div style = "margin-top: 3px; display:none" id="isCollectableSpriteDiv">Collectable: 
+						<select style="width: 60px;float:right;margin-right: 100px;" id = "isCollectableSpriteSelect">
+						<option>no</option>
+						<option>yes</option>
+						</select>
+					</div>
+					<div style = "margin-top: 3px; display:none" id="isBlockSpriteDiv">Blocking: 
+							<select style="width: 60px;float:right;margin-right: 100px;" id = "isBlockSpriteSelect">
+							<option>yes</option>
+							<option>no</option>
+							</select>
+						</div>
+				</div>
+			</div>
 		</div>
 		
 		<canvas id="gameScreen" width="600px" height="300px"></canvas>
